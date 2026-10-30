@@ -1,0 +1,33 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# WebStorm
+.idea/
+*.iml
+
+# Android
+android/.gradle/
+android/local.properties
+android/build/
+android/app/build/
+android/app/release/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Erzeugt: public/ ist die Quelle, Assets sind nur eine Kopie
+android/app/src/main/assets/
+
+
+# Cloud Build / gcloud
+.gcloudignore
+
+# Zugangsdaten - niemals ins Repo
+google-services.json
+client_secret*.json
+serviceAccountKey*.json
+*-firebase-adminsdk-*.json
+.env
+.env.*
