@@ -1,0 +1,50 @@
+# Wird vom Cloud-Build-Trigger bei jedem Push auf main ausgeführt.
+#
+# Reihenfolge mit Absicht: erst Tests, dann bauen, dann ausrollen.
+# Schlägt ein Test fehl, entsteht gar kein Abbild.
+
+substitutions:
+  _DIENST: homeiq
+  _REGION: europe-west1
+  _REPO: homeiq
+
+steps:
+  - id: tests
+    name: node:20-slim
+    entrypoint: npm
+    args: ["test"]
+
+  - id: bauen
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_DIENST}:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_DIENST}:latest
+      - .
+
+  - id: hochladen
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - --all-tags
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_DIENST}
+
+  - id: ausrollen
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_DIENST}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_DIENST}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_DIENST}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

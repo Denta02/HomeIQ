@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "checkJs": true,
+    "baseUrl": ".",
+    "paths": { "*": ["www/js/*"] }
+  },
+  "include": ["www/js", "test", "tools"],
+  "exclude": ["node_modules", "android"]
+}

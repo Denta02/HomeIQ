@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Übersicht – HomeIQ</title>
+<style>
+  :root {
+    --papier:      #E9EEEF;
+    --flaeche:     #F8FAFA;
+    --tinte:       #12313A;
+    --tinte-leise: #58707A;
+    --linie:       #BCCBCF;
+    --linie-fein:  #D8E2E4;
+
+    --akzent:      #0E7C86;
+    --akzent-hell: #D7ECEE;
+
+    --abgelaufen:  #A82D22;
+    --bald:        #A25C06;
+    --gut:         #1E7A5A;
+    --wash-rot:    #FBEDEA;
+    --wash-gelb:   #FCF4E6;
+    --wash-gruen:  #E8F4EF;
+
+    --schild-tief: #0D262E;
+    --schild-hell: #C9DDE0;
+
+    --schmal: "Roboto Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
+    --lauf:   Roboto, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--papier); color: var(--tinte);
+    font-family: var(--lauf); font-size: 15px; line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+  .huelle { max-width: 560px; margin: 0 auto; padding: 0 16px 64px; }
+
+  /* ---------- Kopf ---------- */
+
+  .haus {
+    background: var(--schild-tief); color: var(--schild-hell);
+    border-top: 4px solid var(--akzent);
+    padding: 20px 16px 18px; margin-top: 16px;
+  }
+  .haus h1 {
+    font-family: var(--schmal); font-size: 27px; font-weight: 700;
+    color: #fff; margin: 0 0 2px; line-height: 1.15;
+  }
+  .haus .adresse { font-size: 13.5px; color: var(--akzent-hell); opacity: .72; }
+
+  .ampel { display: flex; gap: 8px; margin-top: 16px; }
+  .ampel div {
+    flex: 1 1 0; padding: 9px 10px; text-align: center;
+    background: rgba(255,255,255,.07);
+    border-bottom: 3px solid var(--linie);
+  }
+  .ampel .zahl { font-family: var(--schmal); font-size: 24px; font-weight: 700; color: #fff; line-height: 1.1; }
+  .ampel .was  { font-family: var(--schmal); font-size: 11.5px; color: var(--akzent-hell); opacity: .8; }
+  .ampel .rot  { border-bottom-color: var(--abgelaufen); }
+  .ampel .gelb { border-bottom-color: var(--bald); }
+  .ampel .gruen{ border-bottom-color: var(--gut); }
+
+  .stichtagzeile { display: flex; gap: 8px; align-items: center; margin: 14px 0 6px; }
+  .stichtagzeile label { font-family: var(--schmal); font-size: 12.5px; color: var(--tinte-leise); }
+  input[type="date"] {
+    font: inherit; font-family: var(--schmal); color: var(--tinte);
+    background: var(--flaeche); border: 1px solid var(--linie);
+    border-bottom: 2px solid var(--akzent); padding: 7px 10px;
+  }
+  input:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
+
+  /* ---------- Abschnitte ---------- */
+
+  .lage {
+    margin: 8px 0 0;
+    padding: 7px 10px;
+    background: var(--flaeche);
+    border-left: 4px solid var(--gut);
+    font-family: var(--schmal);
+    font-size: 12.5px;
+    color: var(--tinte-leise);
+  }
+  .lage.fluechtig { border-left-color: var(--bald); color: var(--bald); }
+  .knopf {
+    font-family: var(--schmal); font-size: 12.5px; font-weight: 600;
+    padding: 4px 9px; margin-left: 8px; cursor: pointer;
+    border: 1px solid var(--akzent); background: transparent; color: var(--akzent);
+  }
+  .knopf:hover { background: var(--akzent-hell); }
+  .knopf:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+
+  .haus.bearbeiten { padding-bottom: 18px; }
+  .formularkopf {
+    font-family: var(--schmal); font-size: 20px; font-weight: 700;
+    color: #fff; margin: 0 0 12px;
+  }
+  .felder { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .feld { display: block; margin-bottom: 10px; }
+  .feld.weit { grid-column: 1 / -1; }
+  .feld > span {
+    display: block; font-family: var(--schmal); font-size: 12.5px;
+    color: var(--akzent-hell); opacity: .75; margin-bottom: 3px;
+  }
+  .feld input, .feld select {
+    width: 100%; font: inherit; font-size: 14px; color: var(--tinte);
+    background: #fff; border: 1px solid var(--linie);
+    border-bottom: 2px solid var(--akzent); padding: 8px 10px;
+  }
+  .hinweiszeile { font-size: 12.5px; color: var(--akzent-hell); opacity: .75; margin: 2px 0 12px; }
+  .meldung { margin: 8px 0; font-size: 13px; padding: 6px 9px; border-left: 3px solid var(--linie); }
+  .meldung.erfolg { border-left-color: var(--gut); color: #fff; }
+  .meldung.fehler { border-left-color: var(--abgelaufen); color: #FFD9D4; }
+  .meldung.hinweis { border-left-color: var(--akzent); color: var(--akzent-hell); }
+  .knopf.voll { background: var(--akzent); color: #fff; }
+  .knopf.hell { margin: 10px 0 0; color: var(--akzent-hell); border-color: var(--akzent-hell); }
+  .knopf.hell:hover { background: rgba(255,255,255,.12); }
+
+  .block {
+    margin-top: 28px;
+    background: var(--flaeche);
+    border: 1px solid var(--linie);
+    border-left: 5px solid var(--akzent);
+  }
+  .block > summary {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none;
+  }
+  .block > summary::-webkit-details-marker { display: none; }
+  .block > summary::after {
+    content: "+"; font-family: var(--schmal); font-size: 19px;
+    font-weight: 700; color: var(--akzent); line-height: 1; order: 3;
+  }
+  .block[open] > summary::after { content: "–"; }
+  .block > summary:focus-visible { outline: 2px solid var(--akzent); outline-offset: -2px; }
+  .block[open] > summary { border-bottom: 1px solid var(--linie-fein); }
+  .btitel { flex: 1 1 auto; font-family: var(--schmal); font-size: 16px; font-weight: 700; }
+  .babzeichen {
+    flex: 0 0 auto; font-family: var(--schmal); font-size: 12.5px;
+    color: var(--tinte-leise); white-space: nowrap;
+  }
+  .binhalt { padding: 12px 14px 16px; }
+  .binhalt .fristen li { background: #fff; }
+
+  section { margin-top: 28px; }
+  h2 {
+    font-family: var(--schmal); font-size: 15px; font-weight: 700;
+    margin: 0 0 10px; padding-bottom: 6px;
+    color: var(--akzent); border-bottom: 2px solid var(--akzent);
+  }
+  .unterzeile { font-size: 13px; color: var(--tinte-leise); margin: -4px 0 12px; }
+
+  /* ---------- Fristenliste ---------- */
+
+  .fristen { list-style: none; margin: 0; padding: 0; }
+  .fristen li {
+    display: flex; justify-content: space-between; gap: 12px;
+    background: var(--flaeche);
+    border-left: 5px solid var(--linie);
+    padding: 11px 13px; margin-bottom: 8px;
+  }
+  .fristen li.abgelaufen { border-left-color: var(--abgelaufen); background: var(--wash-rot); }
+  .fristen li.bald, .fristen li.laeuft_heute_ab { border-left-color: var(--bald); background: var(--wash-gelb); }
+  .fristen li.ok { border-left-color: var(--gut); background: var(--wash-gruen); }
+  .fristen li.unbekannt { border-left-color: var(--tinte-leise); }
+
+  .fristen .links { flex: 1 1 auto; min-width: 0; }
+  .fristen .titel { font-weight: 600; font-size: 14.5px; }
+  .fristen .zusatz { font-size: 12.5px; color: var(--tinte-leise); }
+  .fristen .rechts {
+    flex: 0 0 auto; text-align: right; white-space: nowrap;
+    font-family: var(--schmal);
+  }
+  .fristen .datum { font-size: 17px; font-weight: 700; }
+  .fristen .rest { font-size: 12px; }
+  li.abgelaufen .datum, li.abgelaufen .rest { color: var(--abgelaufen); }
+  li.bald .datum, li.bald .rest { color: var(--bald); }
+  li.ok .datum { color: var(--gut); }
+  li.ok .rest { color: var(--tinte-leise); }
+
+  .geraete .name a { color: inherit; text-decoration: none; border-bottom: 2px solid var(--akzent-hell); }
+  .geraete .name a:hover { border-bottom-color: var(--akzent); }
+  .fristen .zusatz a { color: var(--akzent); text-decoration: none; border-bottom: 1px solid var(--akzent-hell); }
+  .fristen .zusatz a:hover { border-bottom-color: var(--akzent); }
+  a:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+
+  .marke {
+    display: inline-block; font-family: var(--schmal); font-size: 11px;
+    padding: 1px 6px; margin-right: 6px; color: #fff; background: var(--akzent);
+    vertical-align: 1px;
+  }
+  .marke.aufgabe { background: var(--schild-tief); }
+  .fehlermarke { color: var(--abgelaufen); font-size: 12.5px; }
+
+  /* ---------- Geräte ---------- */
+
+  .geraete { list-style: none; margin: 0; padding: 0; }
+  .geraete li {
+    background: var(--flaeche); border: 1px solid var(--linie);
+    border-left: 5px solid var(--akzent);
+    padding: 12px 14px; margin-bottom: 10px;
+  }
+  .geraete .name { font-family: var(--schmal); font-size: 18px; font-weight: 700; }
+  .geraete .ort { font-size: 12.5px; color: var(--tinte-leise); margin-bottom: 8px; }
+  .zaehler { display: flex; gap: 14px; font-family: var(--schmal); font-size: 13px; }
+  .zaehler b { font-size: 16px; }
+  .zaehler .rot { color: var(--abgelaufen); }
+  .zaehler .gelb { color: var(--bald); }
+  .zaehler .gruen { color: var(--gut); }
+
+  .kennzahl {
+    background: var(--schild-tief); color: var(--schild-hell);
+    padding: 16px; border-left: 5px solid var(--akzent);
+  }
+  .kennzahl .gross {
+    font-family: var(--schmal); font-size: 30px; font-weight: 700;
+    color: #fff; line-height: 1.1; margin-bottom: 4px;
+  }
+  .kennzahl .zusatz { color: var(--akzent-hell); opacity: .75; font-size: 12.5px; }
+
+  .leerhinweis {
+    border: 1px dashed var(--akzent); background: var(--akzent-hell);
+    padding: 14px; font-size: 14px;
+  }
+  .fussnote {
+    margin-top: 32px; padding-top: 12px;
+    border-top: 1px solid var(--linie);
+    font-size: 12.5px; color: var(--tinte-leise);
+  }
+  .fehlerkasten {
+    margin: 16px 0; border: 2px solid var(--abgelaufen);
+    padding: 14px; background: var(--flaeche);
+  }
+  .fehlerkasten h2 { border: 0; color: var(--abgelaufen); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="huelle" id="huelle">
+  <div class="fehlerkasten" id="ladefehler" hidden>
+    <h2>Module fehlen</h2>
+    <p>Diese Dateien müssen im selben Ordner liegen: <code>fristen.js</code>,
+       <code>brennstoff.js</code>, <code>objekt.js</code>, <code>demodaten.js</code>,
+       <code>speicher.js</code>, <code>sync.js</code>, <code>drive.js</code> und <code>app.js</code>.</p>
+  </div>
+</div>
+
+<!-- Client-ID der Cloud Console eintragen, dann läuft der
+     Drive-Abgleich auch im Browser. Leer = nur lokal. -->
+<script>window.HOMEIQ_CLIENT_ID = "";</script>
+<script src="js/fristen.js"></script>
+<script src="js/brennstoff.js"></script>
+<script src="js/objekt.js"></script>
+<script src="js/speicher.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/drive.js"></script>
+<script src="js/drive-web.js"></script>
+<script src="js/demodaten.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof window.Fristen === 'undefined' || typeof window.Brennstoff === 'undefined' ||
+      typeof window.Objekt === 'undefined' || typeof window.Demodaten === 'undefined' ||
+      typeof window.Speicher === 'undefined' || typeof window.App === 'undefined') {
+    document.getElementById('ladefehler').hidden = false;
+    return;
+  }
+  var F = window.Fristen, BR = window.Brennstoff;
+  var OB = window.Objekt, D = window.Demodaten;
+
+  var objekt = null;
+  var stichtagStand = '2028-07-01';
+  var alleOffen = false;   // überlebt das Neuzeichnen
+  var bearbeiteObjekt = false;
+  var objektMeldung = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function deDatum(iso) {
+    if (!F.istGueltigesDatum(iso)) return '–';
+    var t = F.parseISO(iso);
+    return String(t.tag).padStart(2, '0') + '.' + String(t.monat).padStart(2, '0') + '.' + t.jahr;
+  }
+
+  function restText(status, restTage) {
+    if (restTage === null) return '';
+    if (status === 'abgelaufen') return 'seit ' + Math.abs(restTage) + ' Tagen';
+    if (status === 'laeuft_heute_ab') return 'heute';
+    if (restTage < 60) return 'in ' + restTage + ' Tagen';
+    return 'in etwa ' + Math.round(restTage / 30.4) + ' Monaten';
+  }
+
+  function kopf(z) {
+    return '<div class="haus">' +
+      '<h1>' + esc(objekt.name) + '</h1>' +
+      '<p class="adresse">' + esc(objekt.adresse) + ' · ' +
+        esc(objekt.gebaeude.nutzung) + ', ' + objekt.gebaeude.einheiten +
+        ' Einheit' + (objekt.gebaeude.einheiten > 1 ? 'en' : '') + ' · ' +
+        objekt.geraete.length + ' Geräte</p>' +
+      '<button type="button" class="knopf hell" id="ob_bearbeiten">bearbeiten</button>' +
+      '<div class="ampel">' +
+        '<div class="rot"><div class="zahl">' + z.abgelaufen + '</div><div class="was">überfällig</div></div>' +
+        '<div class="gelb"><div class="zahl">' + z.bald + '</div><div class="was">demnächst</div></div>' +
+        '<div class="gruen"><div class="zahl">' + z.ok + '</div><div class="was">im Rahmen</div></div>' +
+        (z.unbekannt
+          ? '<div><div class="zahl">' + z.unbekannt + '</div><div class="was">unklar</div></div>'
+          : '') +
+      '</div></div>';
+  }
+
+  function fristenListe(liste) {
+    if (!liste.length) return '<p class="leerhinweis">Nichts erfasst.</p>';
+    return '<ul class="fristen">' + liste.map(function (e) {
+      var rechts = e.fehler
+        ? '<span class="fehlermarke">unklar</span>'
+        : '<div class="datum">' + deDatum(e.datum) + '</div>' +
+          '<div class="rest">' + esc(restText(e.status, e.restTage)) + '</div>';
+
+      return '<li class="' + esc(e.status) + '">' +
+        '<div class="links">' +
+          '<span class="marke ' + esc(e.art) + '">' + (e.art === 'aufgabe' ? 'Wartung' : 'Anspruch') + '</span>' +
+          '<span class="titel">' + esc(e.titel) + '</span><br>' +
+          '<span class="zusatz"><a href="geraeteakte.html?g=' + encodeURIComponent(e.geraetId) + '">' +
+          esc(e.geraetName) + '</a>' +
+          (e.zusatz ? ' · ' + esc(e.zusatz) : '') +
+          (e.gegenueber ? ' · ' + esc(e.gegenueber) : '') + '</span>' +
+          (e.fehler ? '<br><span class="fehlermarke">' + esc(e.fehler) + '</span>' : '') +
+        '</div>' +
+        '<div class="rechts">' + rechts + '</div></li>';
+    }).join('') + '</ul>';
+  }
+
+  function geraeteListe(liste) {
+    return '<ul class="geraete">' + objekt.geraete.map(function (g) {
+      var eigene = OB.fuerGeraet(liste, g.id);
+      var z = OB.zusammenfassung(eigene);
+      return '<li>' +
+        '<div class="name"><a href="geraeteakte.html?g=' + encodeURIComponent(g.id) + '">' +
+        esc(g.name) + '</a></div>' +
+        '<div class="ort">' + esc(g.standort) + '</div>' +
+        '<div class="zaehler">' +
+          '<span class="rot"><b>' + z.abgelaufen + '</b> überfällig</span>' +
+          '<span class="gelb"><b>' + z.bald + '</b> demnächst</span>' +
+          '<span class="gruen"><b>' + z.ok + '</b> im Rahmen</span>' +
+        '</div></li>';
+    }).join('') + '</ul>';
+  }
+
+  function brennstoffBlock() {
+    var mit = objekt.geraete.filter(function (g) { return g.lieferungen && g.lieferungen.length; });
+    if (!mit.length) return '';
+
+    return mit.map(function (g) {
+      var sp = BR.verbrauchSpanne(g.lieferungen, F.istGueltigesDatum, F.tageZwischen);
+      var einheit = g.lieferungen[0].einheit;
+      if (!sp.belastbar) {
+        return '<p class="leerhinweis">' + esc(g.name) + ': ' + esc(sp.grund) + '</p>';
+      }
+      return '<div class="kennzahl">' +
+        '<div class="gross">' + BR.mengeText(Math.round(sp.proJahrHundertstel), einheit) + '</div>' +
+        '<div class="zusatz">hochgerechnet je Jahr · ' +
+          BR.eurText(Math.round(sp.kostenProTagCent * 365)) + ' · ' + esc(g.name) + '</div>' +
+        '<div class="zusatz">Grundlage: ' + BR.mengeText(sp.mengeHundertstel, einheit) +
+          ' in ' + sp.tage + ' Tagen</div></div>';
+    }).join('');
+  }
+
+  function wertVon(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+
+  function objektFormular() {
+    var g = objekt.gebaeude || { nutzung: 'privat', einheiten: 1 };
+    return '<div class="haus bearbeiten">' +
+      '<h2 class="formularkopf">Objekt bearbeiten</h2>' +
+      '<div class="felder">' +
+        '<label class="feld weit"><span>Name</span><input type="text" id="ob_name" value="' +
+          esc(objekt.name) + '"></label>' +
+        '<label class="feld weit"><span>Adresse</span><input type="text" id="ob_adresse" value="' +
+          esc(objekt.adresse || '') + '"></label>' +
+        '<label class="feld"><span>Art</span><select id="ob_typ">' +
+          [['haus','Haus'],['wohnung','Wohnung'],['garage','Garage'],['sonstiges','Sonstiges']]
+            .map(function (o) {
+              return '<option value="' + o[0] + '"' + (objekt.typ === o[0] ? ' selected' : '') +
+                '>' + o[1] + '</option>'; }).join('') +
+        '</select></label>' +
+        '<label class="feld"><span>Baujahr</span><input type="number" id="ob_baujahr" min="1500" max="2100" value="' +
+          esc(objekt.baujahr === null || objekt.baujahr === undefined ? '' : String(objekt.baujahr)) + '"></label>' +
+        '<label class="feld"><span>Nutzung</span><select id="ob_nutzung">' +
+          '<option value="privat"' + (g.nutzung === 'privat' ? ' selected' : '') + '>privat</option>' +
+          '<option value="gewerblich"' + (g.nutzung === 'gewerblich' ? ' selected' : '') + '>gewerblich</option>' +
+        '</select></label>' +
+        '<label class="feld"><span>Einheiten</span><input type="number" id="ob_einheiten" min="1" max="999" value="' +
+          esc(String(g.einheiten || 1)) + '"></label>' +
+      '</div>' +
+      '<p class="hinweiszeile">Nutzung und Anzahl der Einheiten entscheiden, welche Pflichten im Wartungskatalog erscheinen.</p>' +
+      (objektMeldung
+        ? '<p class="meldung ' + esc(objektMeldung.art) + '">' + esc(objektMeldung.text) + '</p>' : '') +
+      '<button type="button" class="knopf voll" id="ob_speichern">Speichern</button> ' +
+      '<button type="button" class="knopf" id="ob_abbrechen">Abbrechen</button>' +
+      '</div>';
+  }
+
+  function objektSpeichern() {
+    var name = wertVon('ob_name');
+    var jahr = parseInt(wertVon('ob_baujahr'), 10);
+    var einheiten = parseInt(wertVon('ob_einheiten'), 10);
+
+    var fehler = [];
+    if (!String(name).trim()) fehler.push('Ohne Namen ist das Objekt nicht zu unterscheiden.');
+    if (wertVon('ob_baujahr').trim() && (!Number.isInteger(jahr) || jahr < 1500 || jahr > 2100)) {
+      fehler.push('Das Baujahr ist unplausibel.');
+    }
+    if (!Number.isInteger(einheiten) || einheiten < 1) fehler.push('Es muss mindestens eine Einheit geben.');
+    if (fehler.length) { objektMeldung = { art: 'fehler', text: fehler.join(' ') }; zeichnen(); return; }
+
+    objekt.name = name;
+    objekt.adresse = wertVon('ob_adresse');
+    objekt.typ = wertVon('ob_typ');
+    objekt.baujahr = Number.isInteger(jahr) ? jahr : null;
+    objekt.gebaeude = { nutzung: wertVon('ob_nutzung'), einheiten: einheiten };
+
+    bearbeiteObjekt = false;
+    objektMeldung = { art: 'erfolg', text: 'Objekt geändert.' };
+    window.App.speichern().then(zeichnen);
+    zeichnen();
+  }
+
+  function lagezeile() {
+    var sp = window.App.zustand.speicher;
+    var dauerhaft = sp ? sp.zustand().dauerhaft : false;
+    return '<p class="lage' + (dauerhaft ? '' : ' fluechtig') + '">' +
+      esc(window.App.lageText()) +
+      ' <button type="button" class="knopf zart" id="zuruecksetzen">Demodaten zurücksetzen</button></p>';
+  }
+
+  function zeichnen() {
+    var feld = document.getElementById('stichtag');
+    if (feld && F.istGueltigesDatum(feld.value)) stichtagStand = feld.value;
+
+    var liste = OB.alleFristen(objekt, stichtagStand, F);
+    var z = OB.zusammenfassung(liste);
+    var dringend = liste.filter(function (e) {
+      return e.status === 'abgelaufen' || e.status === 'bald' ||
+             e.status === 'laeuft_heute_ab' || e.status === 'unbekannt';
+    });
+
+    var html =
+      (bearbeiteObjekt ? objektFormular() : kopf(z)) +
+      lagezeile() +
+      '<div class="stichtagzeile"><label for="stichtag">Stichtag</label>' +
+      '<input type="date" id="stichtag" value="' + esc(stichtagStand) + '"></div>' +
+
+      '<section><h2>Handlungsbedarf</h2>' +
+        (dringend.length
+          ? '<p class="unterzeile">Nach Dringlichkeit, über alle Geräte hinweg.</p>' + fristenListe(dringend)
+          : '<p class="leerhinweis">Nichts überfällig und nichts in den nächsten 30 Tagen.</p>') +
+      '</section>' +
+
+      brennstoffBlock() +
+
+      '<section><h2>Geräte</h2>' + geraeteListe(liste) + '</section>' +
+
+      '<details class="block"' + (alleOffen ? ' open' : '') + ' id="alles">' +
+        '<summary><span class="btitel">Alles mit Frist</span>' +
+        '<span class="babzeichen">' + liste.length + ' Einträge</span></summary>' +
+        '<div class="binhalt">' + fristenListe(liste) + '</div></details>' +
+
+      '<p class="fussnote">Alle Fristen sind Orientierungswerte und ersetzen keine Rechtsberatung. ' +
+      'Maßgeblich sind die Belege und die vertraglichen Vereinbarungen.</p>';
+
+    var huelle = document.getElementById('huelle');
+    huelle.innerHTML = html;
+    var neu = document.getElementById('stichtag');
+    if (neu) neu.addEventListener('change', zeichnen);
+    var alles = document.getElementById('alles');
+    if (alles) alles.addEventListener('toggle', function () { alleOffen = alles.open; });
+    var obB = document.getElementById('ob_bearbeiten');
+    if (obB) obB.addEventListener('click', function () {
+      bearbeiteObjekt = true; objektMeldung = null; zeichnen();
+    });
+    var obS = document.getElementById('ob_speichern');
+    if (obS) obS.addEventListener('click', objektSpeichern);
+    var obA = document.getElementById('ob_abbrechen');
+    if (obA) obA.addEventListener('click', function () {
+      bearbeiteObjekt = false;
+      objektMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
+      zeichnen();
+    });
+    var zur = document.getElementById('zuruecksetzen');
+    if (zur) zur.addEventListener('click', function () {
+      window.App.zuruecksetzen().then(function () { window.location.reload(); });
+    });
+  }
+
+  function starten() {
+    window.App.starten().then(function (z) {
+      if (!z.objekt) {
+        document.getElementById('huelle').innerHTML =
+          '<div class="fehlerkasten"><h2>Keine Daten</h2><p>Es konnte kein Datenstand geladen werden.</p></div>';
+        return;
+      }
+      objekt = z.objekt;
+      zeichnen();
+    }).catch(function (e) {
+      document.getElementById('huelle').innerHTML =
+        '<div class="fehlerkasten"><h2>Start fehlgeschlagen</h2><p>' + esc(e.message) + '</p></div>';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', starten);
+  } else {
+    starten();
+  }
+})();
+</script>
+</body>
+</html>

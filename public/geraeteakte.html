@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Geräteakte – HomeIQ</title>
+<style>
+  :root {
+    --papier:      #E9EEEF;
+    --flaeche:     #F8FAFA;
+    --tinte:       #12313A;
+    --tinte-leise: #58707A;
+    --linie:       #BCCBCF;
+    --linie-fein:  #D8E2E4;
+
+    --akzent:      #0E7C86;
+    --akzent-hell: #D7ECEE;
+
+    --abgelaufen:  #A82D22;
+    --bald:        #A25C06;
+    --gut:         #1E7A5A;
+    --wash-rot:    #FBEDEA;
+    --wash-gelb:   #FCF4E6;
+    --wash-gruen:  #E8F4EF;
+
+    --schild-tief: #0D262E;
+    --schild-hell: #C9DDE0;
+
+    --schmal: "Roboto Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
+    --lauf:   Roboto, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--papier);
+    color: var(--tinte);
+    font-family: var(--lauf);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .huelle { max-width: 560px; margin: 0 auto; padding: 0 16px 64px; }
+
+  /* ---------- Typenschild ---------- */
+
+  .schild {
+    background: var(--schild-tief);
+    color: var(--schild-hell);
+    border-top: 4px solid var(--akzent);
+    padding: 20px 16px 16px;
+    margin-top: 16px;
+  }
+  .schild h1 {
+    font-family: var(--schmal);
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 2px;
+    color: #fff;
+  }
+  .schild .ort { color: var(--akzent-hell); opacity: .72; font-size: 13.5px; margin-bottom: 14px; }
+
+  .paare { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+  .paar { border-top: 1px solid rgba(201,221,224,.22); padding: 7px 0 6px; min-width: 0; }
+  .paar.weit { grid-column: 1 / -1; }
+  .paar dt {
+    font-family: var(--schmal);
+    font-size: 12px;
+    color: var(--akzent-hell);
+    opacity: .6;
+    margin: 0;
+  }
+  .paar dd {
+    font-family: var(--schmal);
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    color: #fff;
+    overflow-wrap: anywhere;
+  }
+  .paar dd.leer { color: var(--akzent-hell); opacity: .5; font-weight: 400; font-style: italic; }
+
+  .schildhinweise { list-style: none; margin: 14px 0 0; padding: 0; }
+  .schildhinweise li {
+    font-size: 12.5px;
+    line-height: 1.4;
+    padding: 5px 0 5px 9px;
+    margin-top: 5px;
+    border-left: 3px solid var(--bald);
+    color: #F0D9AE;
+  }
+  .schildhinweise li.ungeprueft {
+    border-left-color: var(--akzent);
+    color: var(--akzent-hell);
+    opacity: .8;
+  }
+
+  /* ---------- Suche und Stichtag ---------- */
+
+  .werkzeuge { display: flex; gap: 8px; margin: 18px 0 6px; }
+  input[type="search"], input[type="date"] {
+    font: inherit;
+    color: var(--tinte);
+    background: var(--flaeche);
+    border: 1px solid var(--linie);
+    border-bottom: 2px solid var(--akzent);
+    padding: 9px 11px;
+    min-width: 0;
+  }
+  input[type="search"] { flex: 1 1 auto; }
+  input[type="date"] { flex: 0 0 auto; font-family: var(--schmal); }
+  input:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
+  .stichtag-hinweis { font-size: 12px; color: var(--tinte-leise); margin: 0 0 24px; }
+
+  /* ---------- Klappblöcke ---------- */
+
+  .block {
+    margin-top: 12px;
+    background: var(--flaeche);
+    border: 1px solid var(--linie);
+    border-left: 5px solid var(--akzent);
+  }
+  .block.dringend { border-left-color: var(--abgelaufen); }
+  .block > summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    color: var(--tinte);
+    list-style: none;
+  }
+  .block > summary::-webkit-details-marker { display: none; }
+  .block > summary::after {
+    content: "+";
+    font-family: var(--schmal);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--akzent);
+    line-height: 1;
+    order: 3;
+  }
+  .block[open] > summary::after { content: "–"; }
+  .block > summary:focus-visible { outline: 2px solid var(--akzent); outline-offset: -2px; }
+  .block[open] > summary { border-bottom: 1px solid var(--linie-fein); }
+
+  .btitel {
+    flex: 1 1 auto;
+    font-family: var(--schmal);
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .babzeichen {
+    flex: 0 0 auto;
+    font-family: var(--schmal);
+    font-size: 12.5px;
+    color: var(--tinte-leise);
+    white-space: nowrap;
+  }
+  .block.dringend .babzeichen { color: var(--abgelaufen); font-weight: 600; }
+
+  .binhalt { padding: 12px 14px 16px; }
+  .binhalt > .unterzeile { margin-top: 0; }
+  .binhalt .zeile { background: #fff; }
+  .binhalt .katalog { border-top-color: var(--linie); }
+
+  /* ---------- Abschnitte ---------- */
+
+  section { margin-top: 30px; }
+  h2 {
+    font-family: var(--schmal);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 2px;
+    padding-bottom: 6px;
+    color: var(--akzent);
+    border-bottom: 2px solid var(--akzent);
+  }
+  .unterzeile { font-size: 13px; color: var(--tinte-leise); margin: 6px 0 12px; }
+
+  /* ---------- Anspruchszeile ---------- */
+
+  .zeile {
+    border-left: 5px solid var(--linie);
+    background: var(--flaeche);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .zeile.abgelaufen { border-left-color: var(--abgelaufen); background: var(--wash-rot); }
+  .zeile.bald, .zeile.laeuft_heute_ab { border-left-color: var(--bald); background: var(--wash-gelb); }
+  .zeile.ok { border-left-color: var(--gut); background: var(--wash-gruen); }
+
+  .zeile h3 { font-size: 16px; font-weight: 600; margin: 0 0 3px; }
+  .zeile.abgelaufen h3 { color: var(--abgelaufen); }
+  .zeile.bald h3, .zeile.laeuft_heute_ab h3 { color: var(--bald); }
+  .zeile.ok h3 { color: var(--gut); }
+  .gegen { font-size: 13.5px; color: var(--tinte-leise); margin-bottom: 10px; }
+  .gegen b { color: var(--tinte); font-weight: 600; }
+
+  .frist { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .frist .datum {
+    font-family: var(--schmal);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .frist .rest { font-family: var(--schmal); font-size: 14px; }
+  .rest.abgelaufen { color: var(--abgelaufen); }
+  .rest.bald, .rest.laeuft_heute_ab { color: var(--bald); }
+  .rest.ok { color: var(--tinte-leise); }
+
+  details { margin-top: 10px; }
+  summary {
+    font-family: var(--schmal);
+    font-size: 13.5px;
+    cursor: pointer;
+    color: var(--akzent);
+    padding: 3px 0;
+  }
+  summary:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+  details[open] summary { color: var(--tinte); }
+
+  .kette { margin: 8px 0 0; padding: 0; list-style: none; border-left: 2px solid var(--akzent-hell); }
+  .kette li { padding: 4px 0 4px 12px; font-size: 13.5px; }
+  .kette li > span.wert {
+    font-family: var(--schmal);
+    font-weight: 600;
+    float: right;
+    margin-left: 10px;
+    color: var(--akzent);
+  }
+
+  /* ---------- Hinweis (i) ---------- */
+
+  .hinweis { position: relative; display: inline-block; }
+  .hinweis > button {
+    font: 600 11px/14px var(--schmal);
+    width: 16px; height: 16px;
+    margin-left: 5px; padding: 0;
+    vertical-align: 1px;
+    border: 1px solid var(--akzent);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--akzent);
+    cursor: pointer;
+  }
+  .hinweis > button:hover,
+  .hinweis > button[aria-expanded="true"] {
+    background: var(--akzent);
+    color: #fff;
+  }
+  .hinweis > button:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+
+  .hinweis .blase {
+    position: absolute;
+    left: 0; top: calc(100% + 6px);
+    z-index: 5;
+    width: min(272px, 74vw);
+    padding: 11px 13px;
+    background: var(--tinte);
+    color: var(--papier);
+    font-family: var(--lauf);
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.45;
+    text-align: left;
+    visibility: hidden;
+  }
+  .hinweis .blase b { color: #fff; font-weight: 600; }
+  .hinweis .blase::before {
+    content: "";
+    position: absolute;
+    left: 5px; top: -5px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 5px solid var(--tinte);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .hinweis:hover .blase { visibility: visible; }
+  }
+  .hinweis > button[aria-expanded="true"] + .blase { visibility: visible; }
+  .grundlage { font-size: 12.5px; color: var(--tinte-leise); margin: 10px 0 0; }
+
+  /* ---------- Historie ---------- */
+
+  .verlauf { list-style: none; margin: 0; padding: 0; }
+  .verlauf li {
+    position: relative;
+    padding: 0 0 18px 22px;
+    border-left: 2px solid var(--akzent-hell);
+  }
+  .verlauf li:last-child { border-left-color: transparent; padding-bottom: 0; }
+  .verlauf li::before {
+    content: "";
+    position: absolute;
+    left: -6px; top: 5px;
+    width: 10px; height: 10px;
+    background: var(--akzent);
+    border: 2px solid var(--papier);
+    border-radius: 50%;
+  }
+  .verlauf li.stoerung::before { background: var(--bald); }
+  .verlauf li.abnahme::before  { background: var(--gut); }
+  .verlauf .wann { font-family: var(--schmal); font-size: 13px; color: var(--akzent); font-weight: 600; }
+  .verlauf li.stoerung .wann { color: var(--bald); }
+  .verlauf li.abnahme .wann  { color: var(--gut); }
+  .verlauf .was { font-weight: 600; }
+  .verlauf .detail { font-size: 13.5px; color: var(--tinte-leise); }
+
+  /* ---------- Wartung und Dokumente ---------- */
+
+  .liste { list-style: none; margin: 0; padding: 0; }
+  .liste li {
+    display: flex; justify-content: space-between; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linie-fein);
+  }
+  .liste li > span:first-child { flex: 1 1 auto; min-width: 0; }
+  .liste li > span.wert { flex: 0 0 auto; }
+  .liste .titel { font-weight: 500; }
+  .liste .zusatz { font-size: 13px; color: var(--tinte-leise); }
+  .liste .wert { font-family: var(--schmal); font-weight: 600; text-align: right; white-space: nowrap; color: var(--gut); }
+  .wert.abgelaufen { color: var(--abgelaufen); }
+  .wert.bald, .wert.laeuft_heute_ab { color: var(--bald); }
+  .liste .wert .zusatz { color: inherit; opacity: .78; font-weight: 400; }
+  /* ---------- Erledigung eintragen ---------- */
+
+  .tun { margin-top: 9px; }
+  .knopf {
+    font-family: var(--schmal);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border: 1px solid var(--akzent);
+    background: var(--akzent);
+    color: #fff;
+    cursor: pointer;
+  }
+  .knopf:hover { background: #0B646C; border-color: #0B646C; }
+  .knopf:focus-visible { outline: 2px solid var(--tinte); outline-offset: 2px; }
+  .knopf.zart {
+    background: transparent;
+    color: var(--akzent);
+    font-weight: 500;
+    padding: 5px 10px;
+  }
+  .knopf.zart:hover { background: var(--akzent-hell); }
+
+  /* ---------- Gerätewahl ---------- */
+
+  .lage {
+    margin: 0 0 4px;
+    padding: 7px 10px;
+    background: var(--flaeche);
+    border-left: 4px solid var(--gut);
+    font-family: var(--schmal);
+    font-size: 12.5px;
+    color: var(--tinte-leise);
+  }
+  .lage.fluechtig { border-left-color: var(--bald); color: var(--bald); }
+  .lage.abgeschaltet { border-left-color: var(--bald); }
+
+  .knopf.plus {
+    width: 38px; height: 38px; padding: 0;
+    font-size: 22px; line-height: 1; font-weight: 400;
+    vertical-align: middle;
+  }
+  .plushinweis {
+    font-family: var(--schmal); font-size: 13px;
+    color: var(--tinte-leise); margin-left: 9px; vertical-align: middle;
+  }
+  .belegformular {
+    margin-top: 12px; padding: 13px;
+    background: var(--flaeche); border-left: 4px solid var(--akzent);
+  }
+  .belegformular h3 {
+    font-family: var(--schmal); font-size: 15px; margin: 0 0 10px; color: var(--akzent);
+  }
+  .belegformular input[type="file"] {
+    width: 100%; font-size: 13.5px; padding: 8px;
+    background: #fff; border: 1px solid var(--linie);
+  }
+
+  .abgleichfrage {
+    margin: 10px 0; padding: 14px;
+    background: var(--flaeche); border: 2px solid var(--bald);
+  }
+  .abgleichfrage h3 {
+    font-family: var(--schmal); font-size: 15px; margin: 0 0 6px; color: var(--bald);
+  }
+  .wahlliste { list-style: none; margin: 12px 0; padding: 0; }
+  .wahlliste li {
+    padding: 10px 12px; margin-bottom: 8px;
+    background: #fff; border-left: 4px solid var(--akzent);
+  }
+  .wahlliste .knopf { margin-top: 7px; }
+  .lage .knopf { margin-left: 8px; }
+
+  .ansichtwahl { display: flex; gap: 0; margin: 10px 0 0; }
+  .reiter.klein {
+    font-size: 12.5px; padding: 6px 14px;
+    border: 1px solid var(--linie); border-right: none;
+  }
+  .ansichtwahl .reiter.klein:last-child { border-right: 1px solid var(--linie); }
+  .ansichtwahl .reiter.klein.aktiv {
+    background: var(--akzent); border-color: var(--akzent); color: #fff;
+  }
+  .ansichtwahl + .schild { margin-top: 10px; }
+
+  .schutzblock {
+    padding: 14px 16px;
+    border-left: 5px solid var(--gut);
+    background: var(--wash-gruen);
+  }
+  .schutzblock.abgelaufen { border-left-color: var(--abgelaufen); background: var(--wash-rot); }
+  .schutzblock.bald, .schutzblock.laeuft_heute_ab {
+    border-left-color: var(--bald); background: var(--wash-gelb);
+  }
+  .schutzblock .gross {
+    font-family: var(--schmal); font-size: 26px; font-weight: 700;
+    line-height: 1.1; margin-bottom: 4px; color: var(--gut);
+  }
+  .schutzblock.abgelaufen .gross { color: var(--abgelaufen); }
+  .schutzblock.bald .gross, .schutzblock.laeuft_heute_ab .gross { color: var(--bald); }
+  .schutzblock .zusatz { font-size: 13px; color: var(--tinte-leise); }
+
+  .umschalthinweis {
+    margin-top: 24px; padding: 11px 13px;
+    background: var(--akzent-hell); border-left: 4px solid var(--akzent);
+    font-size: 13px; color: var(--tinte);
+  }
+
+  .zurueck { margin: 14px 0 0; font-family: var(--schmal); font-size: 13px; }
+  .zurueck a { color: var(--akzent); text-decoration: none; border-bottom: 1px solid var(--akzent-hell); }
+  .zurueck a:hover { border-bottom-color: var(--akzent); }
+  .zurueck + .wahl { margin-top: 10px; }
+
+  .wahl { display: flex; gap: 6px; margin-top: 16px; flex-wrap: wrap; }
+  .reiter {
+    font-family: var(--schmal); font-size: 13px; font-weight: 600;
+    padding: 7px 12px; cursor: pointer;
+    border: 1px solid var(--linie); border-bottom: none;
+    background: var(--flaeche); color: var(--tinte-leise);
+  }
+  .reiter.aktiv { background: var(--schild-tief); border-color: var(--schild-tief); color: #fff; }
+  .reiter:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+  .wahl + .schild { margin-top: 0; }
+
+  /* ---------- Kennzahl ---------- */
+
+  .kennzahl {
+    background: var(--schild-tief); color: var(--schild-hell);
+    padding: 16px; margin-bottom: 4px;
+    border-left: 5px solid var(--akzent);
+  }
+  .kennzahl .gross {
+    font-family: var(--schmal); font-size: 30px; font-weight: 700;
+    color: #fff; line-height: 1.1; margin-bottom: 4px;
+  }
+  .kennzahl .zusatz { color: var(--akzent-hell); opacity: .75; font-size: 12.5px; }
+
+  .schalter {
+    display: block; margin: 4px 0 2px; font-size: 13.5px; cursor: pointer;
+  }
+  .schalter input { margin-right: 6px; }
+
+  /* ---------- Vorlagenkatalog ---------- */
+
+  .katalog { margin-top: 14px; border-top: 1px solid var(--linie); padding-top: 10px; }
+  .katalog > summary { font-size: 13.5px; font-weight: 600; }
+  .kontext { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin: 10px 0 4px; }
+
+  .vorlagen { list-style: none; margin: 10px 0 0; padding: 0; }
+  .vorlage {
+    background: var(--flaeche);
+    border-left: 4px solid var(--linie);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .vorlage.gesetzlich { border-left-color: var(--abgelaufen); }
+  .vorlage.normativ   { border-left-color: var(--bald); }
+  .vorlage.vertraglich{ border-left-color: var(--akzent); }
+  .vorlage.empfehlung { border-left-color: var(--gut); }
+  .vkopf { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+  .vkopf .titel { font-weight: 600; font-size: 14.5px; }
+  .vhinweis {
+    font-size: 12.5px; line-height: 1.45; color: var(--tinte-leise);
+    margin-top: 5px; padding-left: 8px; border-left: 2px solid var(--linie-fein);
+  }
+  .vfuss { margin-top: 8px; }
+  .weitere { margin-top: 8px; }
+  .weitere > summary { font-size: 12.5px; }
+
+  /* ---------- Störungsablauf ---------- */
+
+  .ablauf { background: var(--flaeche); border: 1px solid var(--linie); padding: 14px; }
+  .ablaufkopf {
+    font-family: var(--schmal); font-size: 14px; font-weight: 700;
+    margin: 18px 0 8px; padding-top: 12px;
+    border-top: 1px solid var(--linie-fein);
+  }
+  .feld { display: block; margin-bottom: 10px; }
+  .feld > span {
+    display: block; font-family: var(--schmal); font-size: 12.5px;
+    color: var(--tinte-leise); margin-bottom: 3px;
+  }
+  .feld textarea, .feld select, .feld input {
+    width: 100%; font: inherit; font-size: 14px; color: var(--tinte);
+    background: #fff; border: 1px solid var(--linie);
+    border-bottom: 2px solid var(--akzent); padding: 8px 10px;
+  }
+  .feld textarea { resize: vertical; }
+  .felder { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .felder .feld:first-child, .felder .feld:nth-child(2) { grid-column: 1 / -1; }
+
+  .gefahr, .gesperrt, .erlaubt {
+    margin: 10px 0; padding: 11px 13px; font-size: 13.5px; line-height: 1.45;
+  }
+  .gefahr {
+    background: var(--abgelaufen); color: #fff;
+    border-left: 6px solid #6E1610;
+  }
+  .gefahr h3 { margin: 0 0 7px; font-size: 15px; }
+  .gefahr ol { margin: 0 0 8px; padding-left: 20px; }
+  .gefahr li { margin-bottom: 4px; }
+  .gefahr p { margin: 0; opacity: .9; font-size: 12.5px; }
+  .gesperrt { background: var(--wash-gelb); border-left: 4px solid var(--bald); color: var(--tinte); }
+  .erlaubt  { background: var(--wash-gruen); border-left: 4px solid var(--gut); color: var(--tinte); }
+
+  .vorschau {
+    margin-top: 12px; padding: 12px 13px;
+    background: #fff; border: 2px solid var(--akzent);
+  }
+  .vorschau h3 { margin: 0 0 8px; font-size: 14px; font-family: var(--schmal); color: var(--akzent); }
+  .folgen { list-style: none; margin: 0 0 12px; padding: 0; }
+  .folgen li {
+    font-size: 13.5px; line-height: 1.45;
+    padding: 5px 0 5px 9px; margin-bottom: 5px;
+    border-left: 3px solid var(--gut);
+  }
+  .folgen li.frage   { border-left-color: var(--bald); }
+  .folgen li.warnung { border-left-color: var(--abgelaufen); }
+  .folgen li.hinweis { border-left-color: var(--linie); color: var(--tinte-leise); }
+
+  .knopf[disabled] { opacity: .45; cursor: not-allowed; }
+  .knopf.gefahr { background: var(--abgelaufen); border-color: var(--abgelaufen); }
+  .knopf.gefahr:hover { background: #8C231A; border-color: #8C231A; }
+
+  .zeilenknoepfe { display: block; margin-top: 6px; }
+  .zeilenknoepfe .knopf { margin-right: 4px; }
+  .loeschfrage {
+    display: inline-block;
+    font-family: var(--schmal);
+    font-size: 12.5px;
+    color: var(--abgelaufen);
+  }
+  .liste li.inarbeit { background: var(--akzent-hell); }
+  .liste li.inaktiv .titel { color: var(--tinte-leise); }
+  .liste li.bearbeiten, .zeile.bearbeiten {
+    background: var(--akzent-hell);
+    border-left: 5px solid var(--akzent);
+    padding: 12px 14px;
+    display: block;
+  }
+  .zeile.bearbeiten h3, .liste li.bearbeiten h3 {
+    font-family: var(--schmal); font-size: 15px; margin: 0 0 10px; color: var(--akzent);
+  }
+  .felder .feld.weit { grid-column: 1 / -1; }
+  .vorschau-zeile {
+    margin: 10px 0; padding: 8px 10px; background: #fff;
+    border-left: 3px solid var(--akzent); font-size: 13.5px;
+  }
+  .vorschau-zeile b { font-family: var(--schmal); font-size: 17px; }
+
+  .schild.bearbeiten {
+    background: var(--flaeche);
+    color: var(--tinte);
+    border-top: 4px solid var(--akzent);
+    border-left: 1px solid var(--linie);
+    border-right: 1px solid var(--linie);
+    border-bottom: 1px solid var(--linie);
+  }
+  .formularkopf {
+    font-family: var(--schmal); font-size: 18px; font-weight: 700;
+    color: var(--akzent); margin: 0 0 12px; padding: 0; border: 0;
+  }
+  .stufenzeile {
+    margin: 4px 0 10px; padding: 7px 10px; font-size: 13px;
+    font-family: var(--schmal); border-left: 4px solid var(--linie);
+  }
+  .stufenzeile.frei { background: var(--wash-gruen); border-left-color: var(--gut); color: var(--gut); }
+  .stufenzeile.eingeschraenkt { background: var(--wash-gelb); border-left-color: var(--bald); color: var(--bald); }
+  .stufenzeile.gesperrt { background: var(--wash-rot); border-left-color: var(--abgelaufen); color: var(--abgelaufen); }
+
+  .geraetknoepfe { margin: 10px 0 0; }
+  .zusatz.weit { grid-column: 1 / -1; }
+
+  .erledigtliste { margin-bottom: 8px; }
+  .erledigtliste > summary { font-size: 12.5px; }
+  .erledigtliste ul { list-style: none; margin: 6px 0 0; padding: 0; }
+  .erledigtliste li {
+    font-size: 13px;
+    padding: 5px 0 5px 9px;
+    border-left: 2px solid var(--linie-fein);
+    margin-bottom: 4px;
+  }
+
+  .modus {
+    display: inline-block;
+    font-family: var(--schmal);
+    font-size: 11px;
+    padding: 1px 6px;
+    vertical-align: 2px;
+    color: var(--tinte-leise);
+    border: 1px solid var(--linie);
+  }
+  .modus.plan {
+    color: #fff;
+    background: var(--schild-tief);
+    border-color: var(--schild-tief);
+  }
+
+  .datumwahl { margin-top: 7px; }
+  .datumwahl > summary { font-size: 12.5px; }
+  .datumzeile { display: flex; gap: 7px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .datumzeile input[type="date"] { padding: 6px 9px; font-size: 13.5px; }
+
+  .meldung {
+    margin: 8px 0 0;
+    font-size: 12.5px;
+    line-height: 1.4;
+    padding: 5px 0 5px 8px;
+    border-left: 3px solid var(--linie);
+  }
+  .meldung.erfolg  { border-left-color: var(--gut); color: var(--gut); }
+  .meldung.fehler  { border-left-color: var(--abgelaufen); color: var(--abgelaufen); }
+  .meldung.hinweis { border-left-color: var(--tinte-leise); color: var(--tinte-leise); }
+
+  .warnung {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--bald);
+    border-left: 3px solid var(--bald);
+    padding-left: 7px;
+  }
+
+  .marke {
+    display: inline-block;
+    font-family: var(--schmal);
+    font-size: 11.5px;
+    padding: 1px 7px;
+    margin-right: 6px;
+    color: #fff;
+    background: var(--akzent);
+    vertical-align: 1px;
+  }
+  .marke.kaufbeleg          { background: var(--akzent); }
+  .marke.reparaturrechnung  { background: var(--bald); }
+  .marke.uebergabeprotokoll { background: var(--gut); }
+  .marke.typenschild        { background: var(--schild-tief); }
+
+  .leerhinweis {
+    border: 1px dashed var(--akzent);
+    background: var(--akzent-hell);
+    padding: 14px;
+    font-size: 14px;
+    color: var(--tinte);
+  }
+
+  .fussnote {
+    margin-top: 34px;
+    padding-top: 12px;
+    border-top: 1px solid var(--linie);
+    font-size: 12.5px;
+    color: var(--tinte-leise);
+  }
+
+  .fehlerkasten {
+    margin: 16px 0;
+    border: 2px solid var(--abgelaufen);
+    padding: 14px;
+    background: var(--flaeche);
+  }
+  .fehlerkasten h2 { border: 0; color: var(--abgelaufen); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="huelle" id="huelle">
+  <div class="fehlerkasten" id="ladefehler" hidden>
+    <h2>Modul fehlt</h2>
+    <p>Diese Dateien müssen im selben Ordner liegen wie <code>geraeteakte.html</code>. Ohne sie lassen sich weder Fristen berechnen
+       noch Nummern richtig benennen.</p>
+  </div>
+</div>
+
+<!-- Client-ID der Cloud Console eintragen, dann läuft der
+     Drive-Abgleich auch im Browser. Leer = nur lokal. -->
+<script>window.HOMEIQ_CLIENT_ID = "";</script>
+<script src="js/fristen.js"></script>
+<script src="js/hersteller.js"></script>
+<script src="js/selbsthilfe.js"></script>
+<script src="js/intervalle.js"></script>
+<script src="js/brennstoff.js"></script>
+<script src="js/belege.js"></script>
+<script src="js/speicher.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/drive.js"></script>
+<script src="js/drive-web.js"></script>
+<script src="js/demodaten.js"></script>
+<script src="js/app.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof window.Fristen === 'undefined' || typeof window.Hersteller === 'undefined' ||
+      typeof window.Selbsthilfe === 'undefined' || typeof window.Intervalle === 'undefined' ||
+      typeof window.Brennstoff === 'undefined' || typeof window.Demodaten === 'undefined' ||
+      typeof window.Speicher === 'undefined' || typeof window.Sync === 'undefined' ||
+      typeof window.App === 'undefined' || typeof window.Belege === 'undefined') {
+    document.getElementById('ladefehler').hidden = false;
+    return;
+  }
+  var F = window.Fristen;
+  var HS = window.Hersteller;
+  var SH = window.Selbsthilfe;
+  var IV = window.Intervalle;
+  var BR = window.Brennstoff;
+
+  /* ============================================================
+   * Demodaten – das Laptop-Szenario aus dem Datenmodell
+   * ============================================================ */
+
+  /* Wird beim Start gefüllt. Vorher wird nicht gezeichnet. */
+  var objekt = null;
+  var geraete = [];
+  /* Startgerät aus der Adresszeile: geraeteakte.html?g=ger_2
+     Unbekannte oder fehlende Angabe fällt auf das erste Gerät zurück. */
+  function startIndex() {
+    var treffer = /[?&]g=([^&#]+)/.exec(window.location.search || '');
+    if (!treffer) return 0;
+    var gesucht = decodeURIComponent(treffer[1]);
+    for (var i = 0; i < geraete.length; i++) {
+      if (geraete[i].id === gesucht) return i;
+    }
+    return 0;
+  }
+
+  var aktivIdx = 0;
+  var geraet = null;
+
+  /* ============================================================
+   * Hilfen
+   * ============================================================ */
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function deDatum(iso) {
+    if (!F.istGueltigesDatum(iso)) return '–';
+    var t = F.parseISO(iso);
+    return String(t.tag).padStart(2, '0') + '.' + String(t.monat).padStart(2, '0') + '.' + t.jahr;
+  }
+
+  function restText(status, restTage) {
+    if (status === 'abgelaufen') return 'seit ' + Math.abs(restTage) + ' Tagen abgelaufen';
+    if (status === 'laeuft_heute_ab') return 'läuft heute ab';
+    if (restTage < 60) return 'noch ' + restTage + ' Tage';
+    var monate = Math.round(restTage / 30.4);
+    return 'noch etwa ' + monate + ' Monate';
+  }
+
+  /* Erklärungen zu Schritten der Herleitung, adressiert über den
+     stabilen Schlüssel aus fristen.js. Ändert sich dort eine
+     Formulierung, bleibt die Zuordnung erhalten. */
+  var ERKLAERUNGEN = {
+    'verlaengerung:nacherfuellung': { titel: 'Nacherfüllung',
+      text: 'Der <b>Verkäufer</b> hat kostenlos repariert, weil er dazu verpflichtet war – nicht gegen Rechnung. ' +
+            'Dafür verlängert sich die Gewährleistung einmalig um 12 Monate. Eine neue Zweijahresfrist beginnt nicht. ' +
+            'Gilt für Verträge ab dem 31.07.2026.' },
+    'verlaengerung:sonstige': { titel: 'Verlängerung',
+      text: 'Eine zusätzliche Laufzeit, die nicht aus der gesetzlichen Nacherfüllung stammt, etwa Kulanz des Händlers.' },
+    'beginn:uebergabe': { titel: 'Übergabe',
+      text: 'Die Frist läuft ab dem Tag, an dem du das Gerät bekommen hast – nicht ab Bestellung oder Rechnungsdatum.' },
+    'beginn:abnahme': { titel: 'Abnahme',
+      text: 'Bei einer bezahlten Reparatur beginnt die Frist mit der Abnahme, also der Rückgabe des funktionierenden Geräts.' },
+    'beginn:einbau': { titel: 'Einbau',
+      text: 'Für ein ersetztes Bauteil zählt der Tag, an dem es eingebaut wurde.' },
+    'beginn:unbekannt': { titel: 'Fristbeginn',
+      text: 'Für diesen Anspruch ist nicht hinterlegt, welches Ereignis die Frist auslöst. Bitte am Beleg prüfen.' },
+    'grundfrist': { titel: 'Grundfrist',
+      text: 'Die reguläre Dauer des Anspruchs, bevor Verlängerungen dazukommen.' },
+    'override': { titel: 'Manueller Wert',
+      text: 'Das berechnete Datum wurde von Hand ersetzt, weil der Beleg etwas anderes ausweist.' }
+  };
+
+  var hinweisZaehler = 0;
+
+  function hinweisKnopf(key) {
+    var treffer = ERKLAERUNGEN[key];
+    if (!treffer) return '';
+    var id = 'blase_' + (++hinweisZaehler);
+    return '<span class="hinweis">' +
+      '<button type="button" aria-expanded="false" aria-controls="' + id + '" ' +
+      'aria-label="Erklärung zu ' + esc(treffer.titel) + '">i</button>' +
+      '<span class="blase" id="' + id + '" role="note">' + treffer.text + '</span></span>';
+  }
+
+  /* Kleine Bausteine, damit die Formulare nicht auseinanderlaufen. */
+  function feldText(id, label, wert, platzhalter) {
+    return '<label class="feld"><span>' + esc(label) + '</span>' +
+      '<input type="text" id="' + id + '" value="' + esc(wert || '') +
+      '" placeholder="' + esc(platzhalter || '') + '"></label>';
+  }
+  function feldDatum(id, label, wert) {
+    return '<label class="feld"><span>' + esc(label) + '</span>' +
+      '<input type="date" id="' + id + '" value="' + esc(wert || '') + '"></label>';
+  }
+  function feldZahl(id, label, wert, min) {
+    return '<label class="feld"><span>' + esc(label) + '</span>' +
+      '<input type="number" id="' + id + '" min="' + (min === undefined ? 0 : min) +
+      '" value="' + esc(wert === null || wert === undefined ? '' : String(wert)) + '"></label>';
+  }
+  function feldWahl(id, label, wert, optionen) {
+    return '<label class="feld"><span>' + esc(label) + '</span><select id="' + id + '">' +
+      optionen.map(function (o) {
+        return '<option value="' + esc(o[0]) + '"' + (wert === o[0] ? ' selected' : '') + '>' +
+          esc(o[1]) + '</option>';
+      }).join('') + '</select></label>';
+  }
+  function wertVon(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+  function hakenVon(id) { var e = document.getElementById(id); return e ? e.checked : false; }
+
+  /* Die Kategorie steuert Sicherheitsgatter und Katalog.
+     Deshalb eine feste Liste statt freier Eingabe. */
+  var KATEGORIEN = [
+    ['elektronik', 'Elektronik'], ['haushaltsgeraet', 'Haushaltsgerät'],
+    ['heizung_oel', 'Ölheizung'], ['heizung_gas', 'Gasheizung'],
+    ['gastherme', 'Gastherme'], ['klima_waermepumpe', 'Wärmepumpe oder Klimagerät'],
+    ['rauchmelder', 'Rauchwarnmelder'], ['feuerloescher', 'Feuerlöscher'],
+    ['wasser_sanitaer', 'Wasser und Sanitär'], ['elektro_fest', 'Feste Elektroinstallation'],
+    ['druckbehaelter', 'Druckbehälter'], ['gebaeude', 'Gebäude'],
+    ['moebel_bau', 'Möbel und Ausbau'], ['sonstiges', 'Sonstiges']
+  ];
+
+  var STUFENTEXT = {
+    frei: 'Selbsthilfe möglich',
+    eingeschraenkt: 'Selbsthilfe eingeschränkt',
+    gesperrt: 'Selbsthilfe gesperrt, nur Fachbetrieb'
+  };
+
+  var ARTTEXT = {
+    gewaehrleistung_kauf: 'Gewährleistung aus dem Kauf',
+    gewaehrleistung_werk: 'Gewährleistung auf die Reparatur',
+    herstellergarantie:   'Herstellergarantie'
+  };
+
+  var TYPTEXT = {
+    kaufbeleg: 'Kauf',
+    reparaturrechnung: 'Reparatur',
+    uebergabeprotokoll: 'Abnahme',
+    typenschild: 'Typenschild'
+  };
+
+  var ROLLENSATZ = {
+    verkaeufer: 'Ansprechpartner ist der Verkäufer',
+    hersteller: 'Ansprechpartner ist der Hersteller',
+    werkstatt:  'Ansprechpartner ist der Reparaturbetrieb'
+  };
+
+  /* Normalisiert für die Suche: Umlaute auflösen, Kleinschreibung. */
+  function norm(s) {
+    return String(s == null ? '' : s).toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+  }
+  /* Zusätzlich alles außer Buchstaben und Ziffern entfernen –
+     damit "XPS159530" auch "XPS 15 9530" findet. */
+  function kompakt(s) { return norm(s).replace(/[^a-z0-9]/g, ''); }
+
+  function trifft(felder, suche) {
+    if (!suche) return true;
+    var heu = felder.filter(Boolean).join(' ');
+    return norm(heu).indexOf(norm(suche)) !== -1 ||
+           kompakt(heu).indexOf(kompakt(suche)) !== -1;
+  }
+
+  /* ============================================================
+   * Rendern
+   * ============================================================ */
+
+  /* Liest die Nummern eines Geräts. Versteht auch die alte Form mit
+     `seriennummer` und `weitereNummern`, damit bestehende Daten
+     weiter funktionieren. */
+  function nummernAusGeraet(g) {
+    var i = g.identitaet || {};
+    if (Array.isArray(i.nummern)) return i.nummern.slice();
+    var liste = [];
+    if (i.seriennummer) liste.push({ art: 'seriennummer', wert: i.seriennummer });
+    (i.weitereNummern || []).forEach(function (n) { liste.push(n); });
+    return liste;
+  }
+
+  function leeresGeraet() {
+    return {
+      id: 'ger_' + Date.now(), name: '', kategorie: 'sonstiges', status: 'aktiv',
+      standort: '', notiz: '',
+      identitaet: { hersteller: '', modell: '', nummern: [], eprelId: null, typenschildFotoId: null },
+      kauf: { datum: '', vertragsDatum: '', verkaeufer: '', preisCent: 0, belegDokumentId: null },
+      ansprueche: [], stoerungen: [], aufgaben: [], dokumente: [],
+      handbuch: { url: '', quelle: '', dokumentId: null }
+    };
+  }
+
+  /* Die Nummernfelder richten sich nach dem Hersteller. Wechselt er,
+     wird nur dieser Block neu aufgebaut, ohne die Seite neu zu zeichnen. */
+  function nummernFelder(herstellerName, nummern) {
+    var schema = HS.schemaFuer(herstellerName);
+    var wertNach = {};
+    (nummern || []).forEach(function (n) { if (n && n.art) wertNach[n.art] = n.wert || ''; });
+
+    var felder = schema.nummern.map(function (f) {
+      return '<label class="feld"><span>' + esc(f.label) + (f.pflicht ? ' *' : '') + '</span>' +
+        '<input type="text" class="ge_nummer" data-art="' + esc(f.art) + '" value="' +
+        esc(wertNach[f.art] || '') + '"></label>';
+    }).join('');
+
+    var fremde = (nummern || []).filter(function (n) {
+      return n && n.wert && !schema.nummern.some(function (f) { return f.art === n.art; });
+    }).map(function (n) {
+      return '<label class="feld"><span>' + esc(n.beschriftung || n.art) + '</span>' +
+        '<input type="text" class="ge_nummer" data-art="' + esc(n.art) +
+        '" data-beschriftung="' + esc(n.beschriftung || '') + '" value="' + esc(n.wert) + '"></label>';
+    }).join('');
+
+    return felder + fremde +
+      '<p class="zusatz weit">' +
+      (schema === HS.STANDARD
+        ? 'Hersteller nicht hinterlegt, allgemeine Felder.'
+        : 'Feldnamen nach ' + esc(schema.marken.join(', ')) +
+          (schema.geprueft ? '' : ' (noch nicht verifiziert)')) + '</p>';
+  }
+
+  function geraetFormular(g) {
+    var neu = bearbeiteGeraet === 'neu';
+    var urteil = SH.bewerteAnliegen(g.kategorie, '');
+
+    return '<div class="schild bearbeiten">' +
+      '<h2 class="formularkopf">' + (neu ? 'Neues Gerät' : 'Gerät bearbeiten') + '</h2>' +
+      '<div class="felder">' +
+        '<label class="feld weit"><span>Name</span><input type="text" id="ge_name" value="' +
+          esc(g.name) + '" placeholder="z. B. Waschmaschine Küche"></label>' +
+        feldWahl('ge_kategorie', 'Kategorie', g.kategorie, KATEGORIEN) +
+        feldWahl('ge_status', 'Status', g.status || 'aktiv', [
+          ['aktiv', 'in Benutzung'], ['in_reparatur', 'in Reparatur'],
+          ['ausgemustert', 'ausgemustert'], ['ersetzt', 'ersetzt']]) +
+        '<label class="feld weit"><span>Standort</span><input type="text" id="ge_standort" value="' +
+          esc(g.standort) + '" placeholder="Raum, Gebäude"></label>' +
+        feldText('ge_hersteller', 'Hersteller', g.identitaet.hersteller, 'z. B. Bosch') +
+        feldText('ge_modell', 'Modell', g.identitaet.modell, '') +
+      '</div>' +
+      '<p class="stufenzeile ' + esc(urteil.stufe) + '" id="ge_stufe">' +
+        esc(STUFENTEXT[urteil.stufe] || '') + '</p>' +
+      '<h3 class="ablaufkopf">Nummern vom Typenschild</h3>' +
+      '<div class="felder" id="ge_nummern">' +
+        nummernFelder(g.identitaet.hersteller, g.identitaet.nummern) +
+      '</div>' +
+      '<h3 class="ablaufkopf">Kauf</h3>' +
+      '<div class="felder">' +
+        feldDatum('ge_kaufdatum', 'Übergabe', g.kauf.datum) +
+        feldDatum('ge_vertrag', 'Vertragsschluss', g.kauf.vertragsDatum) +
+        '<label class="feld weit"><span>Verkäufer</span><input type="text" id="ge_verkaeufer" value="' +
+          esc(g.kauf.verkaeufer) + '"></label>' +
+        feldText('ge_preis', 'Preis in Euro',
+          g.kauf.preisCent ? (g.kauf.preisCent / 100).toFixed(2).replace('.', ',') : '', '0,00') +
+        '<label class="feld weit"><span>Handbuch, Verweis</span><input type="text" id="ge_handbuch" value="' +
+          esc((g.handbuch && g.handbuch.url) || '') + '" placeholder="https://..."></label>' +
+        '<label class="feld weit"><span>Notiz</span><input type="text" id="ge_notiz" value="' +
+          esc(g.notiz || '') + '"></label>' +
+      '</div>' +
+      (geraetMeldung
+        ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
+        : '') +
+      '<button type="button" class="knopf" data-ge-speichern="1">Speichern</button> ' +
+      '<button type="button" class="knopf zart" data-ge-abbrechen="1">Abbrechen</button>' +
+      '</div>';
+  }
+
+  function geraetAusFeldern(vorlage) {
+    var nummern = [];
+    var felder = document.querySelectorAll('.ge_nummer');
+    for (var i = 0; i < felder.length; i++) {
+      var wert = felder[i].value;
+      if (!wert || !String(wert).trim()) continue;
+      var eintrag = { art: felder[i].getAttribute('data-art'), wert: String(wert).trim() };
+      var besch = felder[i].getAttribute('data-beschriftung');
+      if (besch) eintrag.beschriftung = besch;
+      nummern.push(eintrag);
+    }
+
+    var preis = zuHundertstel(wertVon('ge_preis'));
+
+    return {
+      id: vorlage.id,
+      name: wertVon('ge_name'),
+      kategorie: wertVon('ge_kategorie'),
+      status: wertVon('ge_status'),
+      standort: wertVon('ge_standort'),
+      notiz: wertVon('ge_notiz'),
+      identitaet: {
+        hersteller: wertVon('ge_hersteller'),
+        modell: wertVon('ge_modell'),
+        nummern: nummern,
+        eprelId: vorlage.identitaet ? vorlage.identitaet.eprelId : null,
+        typenschildFotoId: vorlage.identitaet ? vorlage.identitaet.typenschildFotoId : null
+      },
+      kauf: {
+        datum: wertVon('ge_kaufdatum'),
+        vertragsDatum: wertVon('ge_vertrag'),
+        verkaeufer: wertVon('ge_verkaeufer'),
+        preisCent: preis === null ? (vorlage.kauf ? vorlage.kauf.preisCent : 0) : preis,
+        belegDokumentId: vorlage.kauf ? vorlage.kauf.belegDokumentId : null
+      },
+      handbuch: { url: wertVon('ge_handbuch'),
+                  quelle: (vorlage.handbuch && vorlage.handbuch.quelle) || '',
+                  dokumentId: (vorlage.handbuch && vorlage.handbuch.dokumentId) || null },
+      /* Angehängtes wird unverändert übernommen. */
+      ansprueche: vorlage.ansprueche || [],
+      stoerungen: vorlage.stoerungen || [],
+      aufgaben: vorlage.aufgaben || [],
+      dokumente: vorlage.dokumente || [],
+      lieferungen: vorlage.lieferungen,
+      geaendert: new Date().toISOString()
+    };
+  }
+
+  function geraetPruefen(g) {
+    var fehler = [];
+    if (!String(g.name).trim()) fehler.push('Ohne Namen ist das Gerät in der Übersicht nicht zu finden.');
+    if (g.kauf.datum && !F.istGueltigesDatum(g.kauf.datum)) fehler.push('Das Übergabedatum ist ungültig.');
+    if (g.kauf.vertragsDatum && !F.istGueltigesDatum(g.kauf.vertragsDatum)) fehler.push('Das Vertragsdatum ist ungültig.');
+    if (g.kauf.datum && g.kauf.vertragsDatum && g.kauf.vertragsDatum > g.kauf.datum) {
+      fehler.push('Der Vertrag kann nicht nach der Übergabe geschlossen worden sein.');
+    }
+    if (wertVon('ge_preis').trim() && zuHundertstel(wertVon('ge_preis')) === null) {
+      fehler.push('Der Preis ist keine gültige Zahl, zum Beispiel 1899,00.');
+    }
+    return fehler;
+  }
+
+  function geraetSpeichern() {
+    var neu = bearbeiteGeraet === 'neu';
+    var vorlage = neu ? leeresGeraet()
+      : geraete.filter(function (x) { return x.id === bearbeiteGeraet; })[0];
+    if (!vorlage) { bearbeiteGeraet = null; zeichnen(); return; }
+
+    var g = geraetAusFeldern(vorlage);
+    var fehler = geraetPruefen(g);
+    if (fehler.length) {
+      geraetMeldung = { art: 'fehler', text: fehler.join(' ') };
+      zeichnen(); return;
+    }
+
+    if (neu) {
+      geraete.push(g);
+      aktivIdx = geraete.length - 1;
+    } else {
+      for (var i = 0; i < geraete.length; i++) {
+        if (geraete[i].id === g.id) { geraete[i] = g; aktivIdx = i; }
+      }
+    }
+    objekt.geraete = geraete;
+    geraet = geraete[aktivIdx];
+    bearbeiteGeraet = null;
+    geraetMeldung = { art: 'erfolg', text: neu ? 'Gerät angelegt.' : 'Gerät geändert.' };
+    sichern();
+  }
+
+  /** Was hängt an einem Gerät? Für die Rückfrage vor dem Löschen. */
+  function geraetInhalt(g) {
+    var teile = [];
+    if ((g.ansprueche || []).length) teile.push(g.ansprueche.length + ' Ansprüche');
+    if ((g.aufgaben || []).length) teile.push(g.aufgaben.length + ' Aufgaben');
+    if ((g.stoerungen || []).length) teile.push(g.stoerungen.length + ' Störungen');
+    if ((g.lieferungen || []).length) teile.push(g.lieferungen.length + ' Lieferungen');
+    if ((g.dokumente || []).length) teile.push(g.dokumente.length + ' Dokumente');
+    return teile;
+  }
+
+  function schild() {
+    var i = geraet.identitaet;
+    var nummern = nummernAusGeraet(geraet);
+    var schema = HS.schemaFuer(i.hersteller);
+
+    var wertNach = {};
+    var beschriftungNach = {};
+    nummern.forEach(function (n) {
+      if (!n || !n.art) return;
+      wertNach[n.art] = n.wert || '';
+      if (n.beschriftung) beschriftungNach[n.art] = n.beschriftung;
+    });
+
+    function paar(label, wert, weit) {
+      var leer = !wert || !String(wert).trim();
+      return '<div class="paar' + (weit ? ' weit' : '') + '">' +
+             '<dt>' + esc(label) + '</dt>' +
+             '<dd class="' + (leer ? 'leer' : '') + '">' + esc(leer ? 'nicht erfasst' : wert) + '</dd></div>';
+    }
+
+    var zeilen = paar('Hersteller', i.hersteller) + paar('Modell', i.modell);
+
+    /* Zuerst die Nummern in der Reihenfolge des Herstellerschemas … */
+    schema.nummern.forEach(function (feld) {
+      if (feld.rolle === 'variante') return;   // steckt in der Modellnummer
+      var wert = wertNach[feld.art];
+      if (!wert && !feld.pflicht) return;      // Optionales ohne Wert nicht zeigen
+      zeilen += paar(feld.label, wert, String(wert || '').length > 14);
+    });
+
+    /* … danach alles, was das Schema nicht kennt. */
+    nummern.forEach(function (n) {
+      if (!n || !n.wert) return;
+      var imSchema = schema.nummern.some(function (f) { return f.art === n.art; });
+      if (imSchema) return;
+      zeilen += paar(n.beschriftung || HS.labelFuer(i.hersteller, n.art), n.wert, true);
+    });
+
+    zeilen += paar('Gekauft am', deDatum(geraet.kauf.datum)) +
+              paar('Verkäufer', geraet.kauf.verkaeufer, true);
+
+    var hinweise = HS.pruefeNummern(i.hersteller, nummern)
+      .filter(function (h) { return h.schwere !== 'unpassend'; })
+      .map(function (h) { return '<li class="' + esc(h.schwere) + '">' + esc(h.text) + '</li>'; })
+      .join('');
+
+    return '<div class="schild">' +
+      '<h1>' + esc(geraet.name) + '</h1>' +
+      '<p class="ort">' + esc(geraet.standort) + '</p>' +
+      '<dl class="paare">' + zeilen + '</dl>' +
+      (hinweise ? '<ul class="schildhinweise">' + hinweise + '</ul>' : '') +
+      '</div>';
+  }
+
+  function leererAnspruch() {
+    return {
+      id: 'ans_' + Date.now(), art: 'herstellergarantie', bezug: 'geraet', bauteil: '',
+      gegenueber: { rolle: 'hersteller', name: '' },
+      beginn: geraet.kauf ? geraet.kauf.datum : '', beginnKey: 'uebergabe',
+      beginnBezeichnung: 'Übergabe', dauerMonate: 24, endeManuell: null,
+      grundlage: '', verlaengerungen: [], belegDokumentId: null, aktiv: true
+    };
+  }
+
+  function anspruchFormular(a) {
+    var neu = bearbeiteAnspruch === 'neu';
+    var auskunft = null;
+    try { auskunft = F.berechneAnspruchEnde(a); } catch (e) { /* noch unvollständig */ }
+
+    return '<div class="zeile bearbeiten"><h3>' + (neu ? 'Neuer Anspruch' : 'Anspruch bearbeiten') + '</h3>' +
+      '<div class="felder">' +
+        feldWahl('an_art', 'Art', a.art, [
+          ['gewaehrleistung_kauf', 'Gewährleistung aus dem Kauf'],
+          ['gewaehrleistung_werk', 'Gewährleistung auf die Reparatur'],
+          ['herstellergarantie', 'Herstellergarantie']]) +
+        feldWahl('an_rolle', 'Ansprechpartner', a.gegenueber.rolle, [
+          ['verkaeufer', 'Verkäufer'], ['hersteller', 'Hersteller'], ['werkstatt', 'Werkstatt']]) +
+        feldText('an_name', 'Name', a.gegenueber.name, 'Firma') +
+        feldWahl('an_bezug', 'Gilt für', a.bezug, [
+          ['geraet', 'das gesamte Gerät'], ['bauteil', 'nur ein Bauteil']]) +
+        feldText('an_bauteil', 'Bauteil', a.bauteil, 'nur bei Bauteil nötig') +
+        feldWahl('an_beginnkey', 'Fristbeginn durch', a.beginnKey || 'uebergabe', [
+          ['uebergabe', 'Übergabe'], ['abnahme', 'Abnahme der Reparatur'],
+          ['einbau', 'Einbau'], ['unbekannt', 'unbekannt']]) +
+        feldDatum('an_beginn', 'Beginn', a.beginn) +
+        feldZahl('an_dauer', 'Grundfrist in Monaten', a.dauerMonate, 0) +
+        feldDatum('an_manuell', 'Ende von Hand (optional)', a.endeManuell) +
+        feldText('an_grundlage', 'Grundlage', a.grundlage, 'z. B. Gesetzliche Gewährleistung') +
+      '</div>' +
+      '<label class="schalter"><input type="checkbox" id="an_aktiv"' +
+        (a.aktiv !== false ? ' checked' : '') + '> aktiv</label>' +
+      (a.verlaengerungen && a.verlaengerungen.length
+        ? '<p class="zusatz">' + a.verlaengerungen.length + ' Verlängerung' +
+          (a.verlaengerungen.length > 1 ? 'en' : '') + ' bleibt erhalten.</p>'
+        : '') +
+      '<p class="vorschau-zeile">Ende: <b id="an_vorschau">' +
+        (auskunft ? deDatum(auskunft.ende) : '—') + '</b></p>' +
+      '<button type="button" class="knopf" data-an-speichern="1">Speichern</button> ' +
+      '<button type="button" class="knopf zart" data-an-abbrechen="1">Abbrechen</button></div>';
+  }
+
+  /** Baut aus den Formularfeldern einen Anspruch. Reine Lesefunktion. */
+  function anspruchAusFeldern(vorlage) {
+    var manuell = wertVon('an_manuell');
+    return {
+      id: vorlage.id,
+      art: wertVon('an_art'),
+      bezug: wertVon('an_bezug'),
+      bauteil: wertVon('an_bauteil'),
+      gegenueber: { rolle: wertVon('an_rolle'), name: wertVon('an_name') },
+      beginn: wertVon('an_beginn'),
+      beginnKey: wertVon('an_beginnkey'),
+      beginnBezeichnung: {
+        uebergabe: 'Übergabe', abnahme: 'Abnahme der Reparatur',
+        einbau: 'Einbau', unbekannt: 'Übergabe bzw. Abnahme'
+      }[wertVon('an_beginnkey')] || 'Übergabe',
+      dauerMonate: parseInt(wertVon('an_dauer'), 10),
+      endeManuell: F.istGueltigesDatum(manuell) ? manuell : null,
+      grundlage: wertVon('an_grundlage'),
+      verlaengerungen: vorlage.verlaengerungen || [],
+      belegDokumentId: vorlage.belegDokumentId || null,
+      aktiv: hakenVon('an_aktiv')
+    };
+  }
+
+  function anspruchPruefen(a) {
+    var fehler = [];
+    if (!F.istGueltigesDatum(a.beginn)) fehler.push('Ohne gültiges Beginndatum lässt sich keine Frist rechnen.');
+    if (!Number.isInteger(a.dauerMonate) || a.dauerMonate < 0) fehler.push('Die Grundfrist muss eine Zahl ab 0 sein.');
+    if (a.bezug === 'bauteil' && !String(a.bauteil).trim()) fehler.push('Bei einem Bauteilanspruch fehlt die Bezeichnung des Bauteils.');
+    if (!String(a.gegenueber.name).trim()) fehler.push('Ohne Ansprechpartner weiß niemand, an wen man sich wenden soll.');
+    return fehler;
+  }
+
+  function anspruchSpeichern() {
+    var neu = bearbeiteAnspruch === 'neu';
+    var vorlage = neu ? leererAnspruch()
+      : (geraet.ansprueche || []).filter(function (x) { return x.id === bearbeiteAnspruch; })[0];
+    if (!vorlage) { bearbeiteAnspruch = null; zeichnen(); return; }
+
+    var a = anspruchAusFeldern(vorlage);
+    var fehler = anspruchPruefen(a);
+    if (fehler.length) {
+      anspruchMeldung = { art: 'fehler', text: fehler.join(' ') };
+      zeichnen(); return;
+    }
+
+    geraet.ansprueche = neu
+      ? (geraet.ansprueche || []).concat([a])
+      : (geraet.ansprueche || []).map(function (x) { return x.id === a.id ? a : x; });
+
+    bearbeiteAnspruch = null;
+    anspruchMeldung = { art: 'erfolg',
+      text: (neu ? 'Anspruch angelegt' : 'Anspruch geändert') +
+            ', läuft bis ' + deDatum(F.berechneAnspruchEnde(a).ende) + '.' };
+    sichern();
+  }
+
+  function anspruchZeile(a, stichtag) {
+    if (bearbeiteAnspruch === a.id) return anspruchFormular(a);
+    var auskunft;
+    try {
+      auskunft = F.anspruchsAuskunft(a, stichtag, 30);
+    } catch (e) {
+      return '<div class="zeile"><h3>' + esc(a.bauteil || 'Anspruch') + '</h3>' +
+             '<p class="gegen">Frist nicht berechenbar: ' + esc(e.message) + '</p></div>';
+    }
+
+    var kette = auskunft.herleitung.map(function (h) {
+      return '<li><span class="wert">' + deDatum(h.ergebnis) + '</span>' +
+             esc(h.schritt) + hinweisKnopf(h.key) + '</li>';
+    }).join('');
+
+    var worauf = a.bezug === 'bauteil'
+      ? 'Gilt nur für: ' + esc(a.bauteil)
+      : 'Gilt für das gesamte Gerät';
+
+    return '<div class="zeile ' + auskunft.status + '">' +
+      '<h3>' + esc(ARTTEXT[a.art] || a.art) + '</h3>' +
+      '<p class="gegen">' + esc(ROLLENSATZ[a.gegenueber.rolle] || 'Ansprechpartner unbekannt') +
+        ': <b>' + esc(a.gegenueber.name) + '</b><br>' + worauf + '</p>' +
+      '<div class="frist">' +
+        '<span class="datum">' + deDatum(auskunft.ende) + '</span>' +
+        '<span class="rest ' + auskunft.status + '">' + esc(restText(auskunft.status, auskunft.restTage)) + '</span>' +
+      '</div>' +
+      '<details><summary>Wie kommt dieses Datum zustande?</summary>' +
+        '<ul class="kette">' + kette + '</ul>' +
+        '<p class="grundlage">' + esc(auskunft.grundlage) + '. ' + esc(auskunft.hinweis) + '</p>' +
+      '</details>' +
+      '<div class="zeilenknoepfe">' +
+        '<button type="button" class="knopf zart" data-an-bearbeiten="' + esc(a.id) + '">bearbeiten</button> ' +
+        loeschKnoepfe('anspruch', a.id) +
+        ((loeschFrage && loeschFrage.art === 'anspruch' && loeschFrage.id === a.id &&
+          a.verlaengerungen && a.verlaengerungen.length)
+          ? '<div class="warnung">Enthält ' + a.verlaengerungen.length +
+            ' Verlängerung' + (a.verlaengerungen.length > 1 ? 'en' : '') +
+            ' aus Reparaturen. Die Begründung geht mit verloren.</div>'
+          : '') +
+      '</div></div>';
+  }
+
+  function historie() {
+    var punkte = [];
+    punkte.push({
+      wann: geraet.kauf.datum,
+      was: 'Gekauft bei ' + geraet.kauf.verkaeufer,
+      detail: (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' € · Vertrag vom ' + deDatum(geraet.kauf.vertragsDatum),
+      art: 'kauf'
+    });
+    geraet.stoerungen.forEach(function (s) {
+      punkte.push({ wann: s.gemeldet, was: 'Störung gemeldet', detail: s.symptom,
+                    art: 'stoerung', stoerungId: s.id });
+      if (s.auftrag && s.auftrag.abnahmeDatum) {
+        var teile = (s.auftrag.getauschteTeile || []).map(function (t) { return t.bezeichnung; }).join(', ');
+        punkte.push({
+          wann: s.auftrag.abnahmeDatum,
+          was: 'Reparatur abgenommen',
+          detail: s.auftrag.firma + ' · getauscht: ' + (teile || 'nichts vermerkt'),
+          art: 'abnahme'
+        });
+      }
+    });
+    punkte.sort(function (a, b) { return a.wann < b.wann ? -1 : 1; });
+
+    return '<ul class="verlauf">' + punkte.map(function (p) {
+      var haengt = p.stoerungId ? abhaengigeAnsprueche(p.stoerungId) : [];
+      var warnung = (loeschFrage && loeschFrage.art === 'stoerung' && loeschFrage.id === p.stoerungId && haengt.length)
+        ? '<div class="warnung">Daran hängt: ' + esc(haengt.join(', ')) +
+          '. Das bleibt bestehen und muss bei Bedarf von Hand entfernt werden.</div>'
+        : '';
+
+      return '<li class="' + esc(p.art || '') + '"><div class="wann">' + deDatum(p.wann) + '</div>' +
+             '<div class="was">' + esc(p.was) + '</div>' +
+             '<div class="detail">' + esc(p.detail) + '</div>' + warnung +
+             (p.stoerungId
+               ? '<div class="zeilenknoepfe">' + loeschKnoepfe('stoerung', p.stoerungId) + '</div>'
+               : '') + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  /* Meldungen je Aufgabe, überleben nur bis zum nächsten Vorgang. */
+  var meldungen = {};
+
+  /* Welche Blöcke offen sind. Überlebt das Neuzeichnen, sonst würde
+     die Seite bei jeder Eingabe wieder zuklappen. */
+  var offeneBloecke = {
+    ansprueche: true, wartung: true, brennstoff: true,
+    stoerungen: false, dokumente: false
+  };
+
+  /**
+   * Ein aufklappbarer Abschnitt. Das Abzeichen in der Kopfzeile soll
+   * die Frage beantworten, ob sich das Aufklappen lohnt.
+   */
+  function block(schluessel, titel, abzeichen, inhalt, dringend) {
+    return '<details class="block' + (dringend ? ' dringend' : '') + '" data-block="' +
+      esc(schluessel) + '"' + (offeneBloecke[schluessel] ? ' open' : '') + '>' +
+      '<summary><span class="btitel">' + esc(titel) + '</span>' +
+      (abzeichen ? '<span class="babzeichen">' + esc(abzeichen) + '</span>' : '') +
+      '</summary><div class="binhalt">' + inhalt + '</div></details>';
+  }
+
+  function findeAufgabe(id) {
+    for (var i = 0; i < geraet.aufgaben.length; i++) {
+      if (geraet.aufgaben[i].id === id) return geraet.aufgaben[i];
+    }
+    return null;
+  }
+
+  /**
+   * Trägt eine Erledigung ein. Prüft vorher, statt stillschweigend
+   * etwas zu speichern, das die Berechnung später ignoriert.
+   */
+  function erledigungEintragen(aufgabeId, datum) {
+    var auf = findeAufgabe(aufgabeId);
+    if (!auf) return;
+
+    if (!F.istGueltigesDatum(datum)) {
+      meldungen[aufgabeId] = { art: 'fehler', text: 'Kein gültiges Datum.' };
+      zeichnen(); return;
+    }
+    if (datum > stichtagStand) {
+      meldungen[aufgabeId] = { art: 'fehler',
+        text: 'Das Datum liegt nach dem Stichtag und würde bei der Berechnung übergangen.' };
+      zeichnen(); return;
+    }
+    var doppelt = (auf.erledigungen || []).some(function (e) { return e.datum === datum; });
+    if (doppelt) {
+      meldungen[aufgabeId] = { art: 'fehler', text: 'Für diesen Tag ist bereits eine Erledigung eingetragen.' };
+      zeichnen(); return;
+    }
+
+    var eintrag = {
+      id: 'erl_' + Date.now(),
+      datum: datum,
+      ausfuehrender: 'selbst',
+      firma: '',
+      kostenCent: 0,
+      ergebnis: 'ok',
+      notiz: '',
+      dokumentIds: [],
+      neu: true                      // nur zur Kennzeichnung im Prototyp
+    };
+    auf.erledigungen = (auf.erledigungen || []).concat([eintrag]);
+    auf.geaendert = new Date().toISOString();
+
+    meldungen[aufgabeId] = { art: 'erfolg', text: 'Eingetragen für den ' + deDatum(datum) + '.', erlId: eintrag.id };
+    sichern();
+  }
+
+  function erledigungEntfernen(aufgabeId, erlId) {
+    var auf = findeAufgabe(aufgabeId);
+    if (!auf) return;
+    auf.erledigungen = (auf.erledigungen || []).filter(function (e) { return e.id !== erlId; });
+    auf.geaendert = new Date().toISOString();
+    meldungen[aufgabeId] = { art: 'hinweis', text: 'Eintrag wieder entfernt.' };
+    sichern();
+  }
+
+  function leereAufgabe() {
+    return {
+      id: 'auf_' + Date.now(), titel: '', quelle: 'eigen', aktiv: true,
+      intervallBasis: 'erledigung', intervallWert: 12, intervallEinheit: 'monate',
+      ankerDatum: stichtagStand, vorlaufTage: 14, erledigungen: []
+    };
+  }
+
+  function aufgabeFormular(auf) {
+    var neu = bearbeiteAufgabe === 'neu';
+    var f = F.naechsteFaelligkeit(auf, stichtagStand);
+
+    return '<li class="bearbeiten"><span><h3>' + (neu ? 'Neue Aufgabe' : 'Aufgabe bearbeiten') + '</h3>' +
+      '<div class="felder">' +
+        '<label class="feld weit"><span>Titel</span><input type="text" id="au_titel" value="' +
+          esc(auf.titel) + '" placeholder="z. B. Filter wechseln"></label>' +
+        feldZahl('au_wert', 'Alle', auf.intervallWert, 1) +
+        feldWahl('au_einheit', 'Einheit', auf.intervallEinheit, [
+          ['tage', 'Tage'], ['monate', 'Monate'], ['jahre', 'Jahre']]) +
+        feldWahl('au_basis', 'Rhythmus', auf.intervallBasis || 'erledigung', [
+          ['erledigung', 'ab der letzten Erledigung'], ['plan', 'fester Plan ab Ankerdatum']]) +
+        feldDatum('au_anker', 'Ankerdatum', auf.ankerDatum) +
+        feldZahl('au_vorlauf', 'Vorwarnung in Tagen', auf.vorlaufTage, 0) +
+      '</div>' +
+      '<label class="schalter"><input type="checkbox" id="au_aktiv"' +
+        (auf.aktiv !== false ? ' checked' : '') + '> aktiv</label>' +
+      (auf.erledigungen && auf.erledigungen.length
+        ? '<p class="zusatz">' + auf.erledigungen.length + ' Erledigung' +
+          (auf.erledigungen.length > 1 ? 'en' : '') + ' bleibt erhalten.</p>'
+        : '') +
+      '<p class="vorschau-zeile">Nächste Fälligkeit: <b id="au_vorschau">' +
+        (f && f.faellig ? deDatum(f.faellig) : '—') + '</b></p>' +
+      '<button type="button" class="knopf" data-au-speichern="1">Speichern</button> ' +
+      '<button type="button" class="knopf zart" data-au-abbrechen="1">Abbrechen</button>' +
+      '</span></li>';
+  }
+
+  function aufgabeAusFeldern(vorlage) {
+    return {
+      id: vorlage.id,
+      titel: wertVon('au_titel'),
+      quelle: vorlage.quelle || 'eigen',
+      aktiv: hakenVon('au_aktiv'),
+      intervallBasis: wertVon('au_basis'),
+      intervallWert: parseInt(wertVon('au_wert'), 10),
+      intervallEinheit: wertVon('au_einheit'),
+      ankerDatum: wertVon('au_anker'),
+      vorlaufTage: parseInt(wertVon('au_vorlauf'), 10),
+      erledigungen: vorlage.erledigungen || []
+    };
+  }
+
+  function aufgabePruefen(auf) {
+    var fehler = [];
+    if (!String(auf.titel).trim()) fehler.push('Ohne Titel lässt sich die Aufgabe später nicht zuordnen.');
+    if (!Number.isInteger(auf.intervallWert) || auf.intervallWert < 1) fehler.push('Das Intervall muss mindestens 1 sein.');
+    if (!Number.isInteger(auf.vorlaufTage) || auf.vorlaufTage < 0) fehler.push('Die Vorwarnung muss eine Zahl ab 0 sein.');
+    if (!F.istGueltigesDatum(auf.ankerDatum)) fehler.push('Das Ankerdatum fehlt oder ist ungültig.');
+    return fehler;
+  }
+
+  function aufgabeSpeichern() {
+    var neu = bearbeiteAufgabe === 'neu';
+    var vorlage = neu ? leereAufgabe() : findeAufgabe(bearbeiteAufgabe);
+    if (!vorlage) { bearbeiteAufgabe = null; zeichnen(); return; }
+
+    var auf = aufgabeAusFeldern(vorlage);
+    var fehler = aufgabePruefen(auf);
+    if (fehler.length) {
+      aufgabeMeldung = { art: 'fehler', text: fehler.join(' ') };
+      zeichnen(); return;
+    }
+
+    geraet.aufgaben = neu
+      ? (geraet.aufgaben || []).concat([auf])
+      : (geraet.aufgaben || []).map(function (x) { return x.id === auf.id ? auf : x; });
+
+    bearbeiteAufgabe = null;
+    var f = F.naechsteFaelligkeit(auf, stichtagStand);
+    aufgabeMeldung = { art: 'erfolg',
+      text: (neu ? 'Aufgabe angelegt' : 'Aufgabe geändert') +
+            (f && f.faellig ? ', nächste Fälligkeit ' + deDatum(f.faellig) + '.' : '.') };
+    sichern();
+  }
+
+  function wartung(stichtag) {
+    var eintraege = geraet.aufgaben.map(function (auf) {
+      if (bearbeiteAufgabe === auf.id) return aufgabeFormular(auf);
+
+      var f = F.naechsteFaelligkeit(auf, stichtag);
+      if (!f) {
+        /* Inaktive Aufgaben verschwanden bisher spurlos. */
+        return '<li class="inaktiv"><span><span class="titel">' + esc(auf.titel) + '</span> ' +
+          '<span class="modus">inaktiv</span>' +
+          '<span class="zeilenknoepfe">' +
+            '<button type="button" class="knopf zart" data-au-bearbeiten="' + esc(auf.id) + '">bearbeiten</button> ' +
+            loeschKnoepfe('aufgabe', auf.id) + '</span></span>' +
+          '<span class="wert"></span></li>';
+      }
+
+      var zukunftHinweis = f.ignorierteZukunft
+        ? '<br><span class="warnung">' + f.ignorierteZukunft +
+          ' Eintrag' + (f.ignorierteZukunft > 1 ? 'e liegen' : ' liegt') +
+          ' nach dem Stichtag und bleibt unberücksichtigt</span>'
+        : '';
+
+      var meldung = meldungen[auf.id];
+      var meldungHtml = meldung
+        ? '<p class="meldung ' + esc(meldung.art) + '">' + esc(meldung.text) +
+          (meldung.art === 'erfolg' && meldung.erlId
+            ? ' <button type="button" class="knopf zart" data-rueckgaengig="' + esc(auf.id) +
+              '" data-eintrag="' + esc(meldung.erlId) + '">rückgängig</button>'
+            : '') + '</p>'
+        : '';
+
+      var erledigt = (auf.erledigungen || []).slice()
+        .filter(function (x) { return F.istGueltigesDatum(x.datum); })
+        .sort(function (a, b) { return a.datum < b.datum ? 1 : -1; });
+
+      var erledigtListe = erledigt.length
+        ? '<details class="erledigtliste"><summary>' + erledigt.length +
+          ' Erledigung' + (erledigt.length > 1 ? 'en' : '') + '</summary><ul>' +
+          erledigt.map(function (e) {
+            return '<li>' + deDatum(e.datum) +
+              (e.firma ? ' · ' + esc(e.firma) : '') +
+              (e.kostenCent ? ' · ' + (e.kostenCent / 100).toFixed(2).replace('.', ',') + ' €' : '') +
+              ' ' + loeschKnoepfe('erledigung', e.id, auf.id) + '</li>';
+          }).join('') + '</ul></details>'
+        : '';
+
+      var knoepfe = '<span class="zeilenknoepfe">' +
+        '<button type="button" class="knopf zart" data-au-bearbeiten="' + esc(auf.id) + '">bearbeiten</button> ' +
+        loeschKnoepfe('aufgabe', auf.id) +
+        ((loeschFrage && loeschFrage.art === 'aufgabe' && loeschFrage.id === auf.id &&
+          auf.erledigungen && auf.erledigungen.length)
+          ? '<div class="warnung">' + auf.erledigungen.length + ' Erledigung' +
+            (auf.erledigungen.length > 1 ? 'en gehen' : ' geht') + ' mit verloren.</div>'
+          : '') +
+        '</span>';
+
+      var bedienung =
+        '<div class="tun">' + knoepfe + erledigtListe +
+          '<button type="button" class="knopf" data-erledigt="' + esc(auf.id) + '">' +
+            'Erledigt am ' + deDatum(stichtag) + '</button>' +
+          '<details class="datumwahl"><summary>anderes Datum</summary>' +
+            '<div class="datumzeile">' +
+              '<input type="date" id="dat_' + esc(auf.id) + '" value="' + esc(stichtag) +
+              '" max="' + esc(stichtag) + '" aria-label="Datum der Erledigung">' +
+              '<button type="button" class="knopf zart" data-erledigt-feld="' + esc(auf.id) + '">Eintragen</button>' +
+            '</div>' +
+          '</details>' +
+          meldungHtml +
+        '</div>';
+
+      if (f.fehler) {
+        return '<li><span><span class="titel">' + esc(f.titel || auf.titel) + '</span>' + zukunftHinweis +
+               bedienung + '</span>' +
+               '<span class="wert abgelaufen">' + esc(f.fehler) + '</span></li>';
+      }
+
+      var rhythmus = f.intervallBasis === 'plan'
+        ? '<span class="modus plan" title="Verspätete Erledigung verschiebt den Rhythmus nicht">fester Plan</span>'
+        : '<span class="modus">ab Erledigung</span>';
+
+      var basiszeile = '<span class="zusatz">' + esc(f.basisArt) + ': ' + deDatum(f.basis) + '</span>';
+      if (f.intervallBasis === 'plan') {
+        basiszeile += '<br><span class="zusatz">zuletzt erledigt: ' +
+          (f.letzteErledigung ? deDatum(f.letzteErledigung) : 'noch nie') + '</span>';
+      }
+
+      return '<li><span><span class="titel">' + esc(f.titel) + '</span> ' + rhythmus + '<br>' +
+             basiszeile +
+             zukunftHinweis + bedienung + '</span>' +
+             '<span class="wert ' + f.status + '">' +
+             '<span class="zusatz">fällig</span><br>' + deDatum(f.faellig) + '<br>' +
+             '<span class="zusatz">' + esc(restText(f.status, f.restTage)) + '</span></span></li>';
+    }).join('');
+    var meldung = aufgabeMeldung
+      ? '<p class="meldung ' + esc(aufgabeMeldung.art) + '">' + esc(aufgabeMeldung.text) + '</p>'
+      : '';
+
+    return '<ul class="liste">' + eintraege +
+      (bearbeiteAufgabe === 'neu' ? aufgabeFormular(leereAufgabe()) : '') + '</ul>' +
+      meldung +
+      (bearbeiteAufgabe ? '' :
+        '<button type="button" class="knopf zart" data-au-neu="1">Eigene Aufgabe anlegen</button>');
+  }
+
+  /* Alle durchsuchbaren Felder eines Geräts, inklusive der Nummern. */
+  function suchfelder() {
+    var i = geraet.identitaet || {};
+    var felder = [geraet.name, geraet.standort, i.hersteller, i.modell, geraet.kauf.verkaeufer];
+    nummernAusGeraet(geraet).forEach(function (n) {
+      if (n && n.wert) { felder.push(n.wert); felder.push(n.beschriftung || ''); }
+    });
+    return felder;
+  }
+
+  var DOKUMENTARTEN = [
+    ['kaufbeleg', 'Kaufbeleg'],
+    ['reparaturrechnung', 'Reparaturrechnung'],
+    ['kostenvoranschlag', 'Kostenvoranschlag'],
+    ['uebergabeprotokoll', 'Übergabeprotokoll'],
+    ['garantiebedingungen', 'Garantiebedingungen'],
+    ['handbuch', 'Handbuch'],
+    ['typenschild', 'Typenschild'],
+    ['foto', 'Foto'],
+    ['sonstiges', 'Sonstiges']
+  ];
+
+  /**
+   * Nimmt die gewählte Datei entgegen. Die Datei wandert in den
+   * Belegspeicher, die Beschreibung ins Objekt – zwei Orte, bewusst.
+   */
+  function belegAufnehmen() {
+    var feld = document.getElementById('bl_datei');
+    var datei = feld && feld.files && feld.files[0] ? feld.files[0] : null;
+    var titel = wertVon('bl_titel');
+    var typ = wertVon('bl_typ');
+    var datum = wertVon('bl_datum');
+
+    if (!datei) {
+      belegMeldung = { art: 'fehler', text: 'Es ist keine Datei gewählt.' };
+      zeichnen(); return;
+    }
+    if (datum && !F.istGueltigesDatum(datum)) {
+      belegMeldung = { art: 'fehler', text: 'Das Datum ist ungültig.' };
+      zeichnen(); return;
+    }
+
+    var belege = window.App.zustand.belege;
+    if (!belege) {
+      belegMeldung = { art: 'fehler', text: 'Der Belegspeicher steht nicht zur Verfügung.' };
+      zeichnen(); return;
+    }
+
+    var id = 'dok_' + Date.now();
+    belege.ablegen(id, datei, {
+      dateiname: datei.name, mime: datei.type, groesseBytes: datei.size
+    }).then(function (r) {
+      if (!r.erfolg) {
+        belegMeldung = { art: 'fehler', text: r.fehler };
+        zeichnen(); return;
+      }
+
+      geraet.dokumente = (geraet.dokumente || []).concat([{
+        id: id,
+        titel: String(titel).trim() || datei.name,
+        typ: typ,
+        dateiname: datei.name,
+        mime: datei.type,
+        groesseBytes: datei.size,
+        driveFileId: null,
+        ocrText: '',
+        bezug: { art: 'geraet', id: geraet.id },
+        erstellt: datum || stichtagStand
+      }]);
+
+      belegFormular = false;
+      belegMeldung = { art: r.warnung ? 'hinweis' : 'erfolg',
+        text: (r.warnung ? r.warnung + ' ' : '') + 'Beleg aufgenommen.' };
+      sichern();
+    });
+  }
+
+  function belegOeffnen(id) {
+    var belege = window.App.zustand.belege;
+    if (!belege) return;
+    belege.holen(id).then(function (e) {
+      if (!e || !e.inhalt) {
+        belegMeldung = { art: 'fehler',
+          text: 'Die Datei zu diesem Beleg ist nicht auffindbar. Sie wurde eventuell auf einem anderen Gerät aufgenommen.' };
+        zeichnen(); return;
+      }
+      try {
+        var url = URL.createObjectURL(e.inhalt);
+        window.open(url, '_blank');
+        setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+      } catch (f) {
+        belegMeldung = { art: 'fehler', text: 'Öffnen fehlgeschlagen: ' + f.message };
+        zeichnen();
+      }
+    });
+  }
+
+  function belegEntfernen(id) {
+    geraet.dokumente = (geraet.dokumente || []).filter(function (d) { return d.id !== id; });
+    var belege = window.App.zustand.belege;
+    if (belege) belege.entfernen(id);
+    belegMeldung = { art: 'hinweis', text: 'Beleg entfernt.' };
+    sichern();
+  }
+
+  function belegFormularHtml() {
+    if (!belegFormular) {
+      return '<button type="button" class="knopf plus" data-beleg-neu="1" ' +
+        'aria-label="Beleg hinzufügen">+</button>' +
+        '<span class="plushinweis">Beleg hinzufügen</span>';
+    }
+    return '<div class="belegformular">' +
+      '<h3>Beleg hinzufügen</h3>' +
+      '<label class="feld weit"><span>Datei oder Foto</span>' +
+      '<input type="file" id="bl_datei" accept="image/*,application/pdf"></label>' +
+      '<div class="felder">' +
+        '<label class="feld weit"><span>Titel</span><input type="text" id="bl_titel" ' +
+          'placeholder="bleibt leer: Dateiname"></label>' +
+        feldWahl('bl_typ', 'Art', 'kaufbeleg', DOKUMENTARTEN) +
+        feldDatum('bl_datum', 'Datum', stichtagStand) +
+      '</div>' +
+      '<p class="zusatz">Die Datei bleibt vorerst auf diesem Gerät. ' +
+      'Die Übertragung nach Drive gibt es noch nicht.</p>' +
+      '<button type="button" class="knopf" data-beleg-speichern="1">Aufnehmen</button> ' +
+      '<button type="button" class="knopf zart" data-beleg-abbrechen="1">Abbrechen</button>' +
+      '</div>';
+  }
+
+  function dokumente(suche) {
+    /* Passt die Suche auf das Gerät selbst, etwa auf eine Nummer vom
+       Typenschild, bleiben alle Dokumente sichtbar. */
+    var geraetTrifft = trifft(suchfelder(), suche);
+    var treffer = geraet.dokumente.filter(function (d) {
+      return geraetTrifft || trifft([d.titel, d.typ, d.ocrText], suche);
+    });
+    if (!treffer.length) {
+      return '<p class="leerhinweis">Kein Dokument enthält „' + esc(suche) + '“. ' +
+             'Gesucht wird auch im erkannten Text der Belege.</p>' + belegFormularHtml();
+    }
+    return '<ul class="liste">' + treffer.map(function (d) {
+      var hatDatei = !!(d.dateiname || d.mime);
+      return '<li><span><span class="marke ' + esc(d.typ) + '">' +
+             esc(TYPTEXT[d.typ] || DOKUMENTTEXT(d.typ)) + '</span>' +
+             '<span class="titel">' + esc(d.titel) + '</span><br>' +
+             '<span class="zusatz">' +
+               (d.ocrText ? esc(d.ocrText.slice(0, 70)) + '…' : esc(d.dateiname || 'keine Datei')) +
+             '</span>' +
+             '<span class="zeilenknoepfe">' +
+               (hatDatei
+                 ? '<button type="button" class="knopf zart" data-beleg-oeffnen="' + esc(d.id) + '">öffnen</button> '
+                 : '') +
+               loeschKnoepfe('beleg', d.id) +
+             '</span></span>' +
+             '<span class="wert">' + deDatum(d.erstellt) + '</span></li>';
+    }).join('') + '</ul>' +
+      (belegMeldung
+        ? '<p class="meldung ' + esc(belegMeldung.art) + '">' + esc(belegMeldung.text) + '</p>'
+        : '') +
+      belegFormularHtml();
+  }
+
+  function DOKUMENTTEXT(typ) {
+    for (var i = 0; i < DOKUMENTARTEN.length; i++) {
+      if (DOKUMENTARTEN[i][0] === typ) return DOKUMENTARTEN[i][1];
+    }
+    return typ;
+  }
+
+  /* Stichtag der Demo. Wird einmal gesetzt und danach vom Feld selbst
+     gehalten – die frühere Nachkorrektur griff nie, weil das Feld beim
+     ersten Aufbau bereits mit dem heutigen Datum gefüllt war. */
+  var stichtagStand = '2028-07-01';
+
+  /* ============================================================
+   * Störungsablauf
+   * ============================================================ */
+
+  var ablauf = {
+    symptom: '',
+    traeger: '',
+    bezahlt: '',
+    abnahme: '',
+    firma: '',
+    ergebnis: null,      // Vorschau von folgeAusReparatur
+    meldung: null
+  };
+
+  function ablaufLesen() {
+    var f = function (id) { var e = document.getElementById(id); return e ? e.value : ''; };
+    ablauf.symptom = f('sym');
+    ablauf.traeger = f('traeger');
+    ablauf.bezahlt = f('bezahlt');
+    ablauf.abnahme = f('abnahme');
+    ablauf.firma = f('firma');
+  }
+
+  function folgeBerechnen() {
+    ablaufLesen();
+    ablauf.ergebnis = null;
+    ablauf.meldung = null;
+
+    if (!ablauf.traeger) {
+      ablauf.meldung = { art: 'fehler', text: 'Bitte angeben, wer repariert hat.' };
+      zeichnen(); return;
+    }
+    if (!ablauf.bezahlt) {
+      ablauf.meldung = { art: 'fehler', text: 'Bitte angeben, ob die Reparatur bezahlt wurde.' };
+      zeichnen(); return;
+    }
+
+    ablauf.ergebnis = F.folgeAusReparatur(geraet.ansprueche, {
+      traeger: ablauf.traeger,
+      bezahlt: ablauf.bezahlt === 'ja',
+      abnahmeDatum: ablauf.abnahme,
+      vertragsDatum: geraet.kauf.vertragsDatum,
+      firma: ablauf.firma,
+      stoerungId: 'sto_neu',
+      getauschteTeile: []
+    });
+    zeichnen();
+  }
+
+  /* Übernimmt die Vorschau in die Daten. Erst hier wird geschrieben. */
+  function folgeUebernehmen() {
+    if (!ablauf.ergebnis) return;
+    var zahl = 0;
+
+    ablauf.ergebnis.folgen.forEach(function (folge) {
+      if (folge.art === 'verlaengerung') {
+        for (var i = 0; i < geraet.ansprueche.length; i++) {
+          if (geraet.ansprueche[i].id === folge.anspruchId) {
+            geraet.ansprueche[i].verlaengerungen =
+              (geraet.ansprueche[i].verlaengerungen || []).concat([folge.verlaengerung]);
+            zahl++;
+          }
+        }
+      } else if (folge.art === 'neuerAnspruch') {
+        geraet.ansprueche = geraet.ansprueche.concat([folge.anspruch]);
+        zahl++;
+      }
+    });
+
+    geraet.stoerungen = geraet.stoerungen.concat([{
+      id: 'sto_' + Date.now(),
+      gemeldet: ablauf.abnahme || stichtagStand,
+      symptom: ablauf.symptom || 'ohne Beschreibung',
+      status: 'erledigt',
+      auftrag: {
+        firma: ablauf.firma || '',
+        abnahmeDatum: ablauf.abnahme || '',
+        getauschteTeile: []
+      },
+      ergebnis: 'repariert',
+      dokumentIds: []
+    }]);
+
+    ablauf.ergebnis = null;
+    ablauf.meldung = { art: 'erfolg', text: zahl
+      ? 'Übernommen. ' + zahl + ' Anspruch' + (zahl > 1 ? 'sänderungen' : 'sänderung') + ' eingetragen.'
+      : 'Störung vermerkt. Es ergab sich keine Änderung an den Ansprüchen.' };
+    sichern();
+  }
+
+  function stoerungsAblauf() {
+    var urteil = SH.bewerteAnliegen(geraet.kategorie, ablauf.symptom);
+
+    var sicherheit;
+    if (urteil.notfall) {
+      sicherheit = '<div class="gefahr"><h3>' + esc(urteil.notfall.titel) + '</h3><ol>' +
+        urteil.notfall.schritte.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') +
+        '</ol><p>Keine Selbsthilfe, keine Ferndiagnose. Erst wenn die Lage sicher ist, weiter im Gerät.</p></div>';
+    } else if (urteil.stufe === 'gesperrt') {
+      sicherheit = '<div class="gesperrt"><b>Keine Selbsthilfe möglich.</b> ' + esc(urteil.grund) +
+        (urteil.fachbetrieb ? ' Zuständig: ' + esc(urteil.fachbetrieb) + '.' : '') + '</div>';
+    } else {
+      sicherheit = '<div class="erlaubt"><b>Selbsthilfe möglich</b> – ' + esc(urteil.grund) +
+        '<br>Themen: ' + esc(urteil.erlaubteThemen.join(' · ')) + '</div>';
+    }
+
+    var knopfKI = urteil.darfModellFragen
+      ? '<button type="button" class="knopf zart" disabled title="Im Prototyp ohne Modellanbindung">KI um Rat fragen</button>'
+      : '';
+
+    var vorschau = '';
+    if (ablauf.ergebnis) {
+      var folgen = ablauf.ergebnis.folgen.map(function (x) {
+        if (x.art === 'verlaengerung') {
+          return '<li><b>Verlängerung um ' + x.verlaengerung.monate + ' Monate</b> am bestehenden Anspruch</li>';
+        }
+        var ende = F.berechneAnspruchEnde(x.anspruch).ende;
+        return '<li><b>Neuer Anspruch</b> gegen ' + esc(x.anspruch.gegenueber.name || 'den Betrieb') +
+               ', läuft bis ' + deDatum(ende) + ' – gilt nur für die Reparatur</li>';
+      }).join('');
+
+      var hinweise = ablauf.ergebnis.hinweise.map(function (h) {
+        return '<li class="' + esc(h.schwere) + '">' + esc(h.text) + '</li>';
+      }).join('');
+
+      vorschau = '<div class="vorschau"><h3>Das würde sich ändern</h3>' +
+        (folgen ? '<ul class="folgen">' + folgen + '</ul>'
+                : '<p class="zusatz">Keine Änderung an den Ansprüchen.</p>') +
+        (hinweise ? '<ul class="folgen">' + hinweise + '</ul>' : '') +
+        '<button type="button" class="knopf" data-uebernehmen="1">Übernehmen</button> ' +
+        '<button type="button" class="knopf zart" data-verwerfen="1">Verwerfen</button></div>';
+    }
+
+    var meldung = ablauf.meldung
+      ? '<p class="meldung ' + esc(ablauf.meldung.art) + '">' + esc(ablauf.meldung.text) + '</p>'
+      : '';
+
+    return '<div class="ablauf">' +
+      '<label class="feld"><span>Was ist passiert?</span>' +
+      '<textarea id="sym" rows="2" placeholder="z. B. Lüfter laut, Fehlercode E18">' +
+      esc(ablauf.symptom) + '</textarea></label>' +
+      '<button type="button" class="knopf zart" data-pruefen="1">Sicherheit prüfen</button>' +
+      sicherheit + knopfKI +
+
+      '<h3 class="ablaufkopf">Wurde repariert?</h3>' +
+      '<div class="felder">' +
+        '<label class="feld"><span>Wer hat repariert?</span><select id="traeger">' +
+          '<option value="">bitte wählen</option>' +
+          '<option value="verkaeufer"' + (ablauf.traeger === 'verkaeufer' ? ' selected' : '') + '>Verkäufer</option>' +
+          '<option value="hersteller"' + (ablauf.traeger === 'hersteller' ? ' selected' : '') + '>Hersteller</option>' +
+          '<option value="werkstatt"' + (ablauf.traeger === 'werkstatt' ? ' selected' : '') + '>freie Werkstatt</option>' +
+          '<option value="selbst"' + (ablauf.traeger === 'selbst' ? ' selected' : '') + '>selbst</option>' +
+        '</select></label>' +
+        '<label class="feld"><span>Hast du bezahlt?</span><select id="bezahlt">' +
+          '<option value="">bitte wählen</option>' +
+          '<option value="nein"' + (ablauf.bezahlt === 'nein' ? ' selected' : '') + '>nein, kostenlos</option>' +
+          '<option value="ja"' + (ablauf.bezahlt === 'ja' ? ' selected' : '') + '>ja, gegen Rechnung</option>' +
+        '</select></label>' +
+        '<label class="feld"><span>Abnahme</span>' +
+        '<input type="date" id="abnahme" value="' + esc(ablauf.abnahme) + '" max="' + esc(stichtagStand) + '"></label>' +
+        '<label class="feld"><span>Betrieb</span>' +
+        '<input type="text" id="firma" value="' + esc(ablauf.firma) + '" placeholder="Name"></label>' +
+      '</div>' +
+      '<button type="button" class="knopf" data-folge="1">Folge berechnen</button>' +
+      meldung + vorschau +
+      '</div>';
+  }
+
+  /* ============================================================
+   * Vorlagen aus dem Intervallkatalog
+   * ============================================================ */
+
+  /* Der Kontext gehört eigentlich ans Objekt, nicht ans Gerät.
+     Im Prototyp steht er hier, damit die Filterung sichtbar wird. */
+  var objektKontext = { nutzung: 'privat', einheiten: 1 };
+  var vorlagenMeldung = null;
+
+  function bereitsAngelegt(key) {
+    return geraet.aufgaben.some(function (a) { return a.quelle === 'vorlage:' + key; });
+  }
+
+  function vorlageHinzufuegen(key) {
+    var vorlage = IV.vorlageNach(key);
+    if (!vorlage) return;
+    if (bereitsAngelegt(key)) {
+      vorlagenMeldung = { art: 'fehler', text: 'Diese Aufgabe ist bereits angelegt.' };
+      zeichnen(); return;
+    }
+    try {
+      var neu = IV.aufgabeAusVorlage(key, stichtagStand);
+      geraet.aufgaben = geraet.aufgaben.concat([neu]);
+      vorlagenMeldung = { art: 'erfolg',
+        text: '„' + vorlage.titel + '" angelegt, Ankerdatum ' + deDatum(stichtagStand) + '.' };
+    } catch (e) {
+      vorlagenMeldung = { art: 'fehler', text: e.message };
+      zeichnen(); return;
+    }
+    sichern();
+  }
+
+  function vorlagenListe() {
+    var passend = IV.vorlagenFuer(null, objektKontext);
+    var eigene = passend.filter(function (v) { return v.kategorie === geraet.kategorie; });
+    var weitere = passend.filter(function (v) { return v.kategorie !== geraet.kategorie; });
+
+    function zeile(v) {
+      var schon = bereitsAngelegt(v.key);
+      var machbar = v.art === 'wiederkehrend';
+      var knopf = !machbar
+        ? '<span class="zusatz">keine Intervallaufgabe</span>'
+        : schon
+          ? '<span class="zusatz">angelegt</span>'
+          : '<button type="button" class="knopf zart" data-vorlage="' + esc(v.key) + '">hinzufügen</button>';
+
+      return '<li class="vorlage ' + esc(v.pflichtArt) + '">' +
+        '<div class="vkopf"><span class="titel">' + esc(v.titel) + '</span>' +
+        (v.geprueft ? '' : '<span class="modus" title="Noch nicht an einer Quelle verifiziert">ungeprüft</span>') +
+        '</div>' +
+        '<div class="zusatz">' + esc(IV.herkunftText(v)) + '</div>' +
+        (v.hinweis ? '<div class="vhinweis">' + esc(v.hinweis) + '</div>' : '') +
+        '<div class="vfuss">' + knopf + '</div></li>';
+    }
+
+    var meldung = vorlagenMeldung
+      ? '<p class="meldung ' + esc(vorlagenMeldung.art) + '">' + esc(vorlagenMeldung.text) + '</p>'
+      : '';
+
+    return '<details class="katalog"><summary>Aufgabe aus dem Katalog hinzufügen</summary>' +
+      '<div class="kontext">' +
+        '<label class="feld"><span>Nutzung</span><select id="knutzung">' +
+          '<option value="privat"' + (objektKontext.nutzung === 'privat' ? ' selected' : '') + '>privat</option>' +
+          '<option value="gewerblich"' + (objektKontext.nutzung === 'gewerblich' ? ' selected' : '') + '>gewerblich</option>' +
+        '</select></label>' +
+        '<label class="feld"><span>Wohn-/Nutzungseinheiten</span>' +
+        '<input type="number" id="keinheiten" min="1" max="999" value="' + objektKontext.einheiten + '"></label>' +
+      '</div>' +
+      '<p class="zusatz">Der Katalog zeigt nur, was für dieses Gebäude gilt. ' +
+      'Ab sechs Einheiten kommen weitere Pflichten dazu.</p>' +
+      meldung +
+      '<ul class="vorlagen">' + eigene.map(zeile).join('') + '</ul>' +
+      (weitere.length
+        ? '<details class="weitere"><summary>Weitere Vorlagen (' + weitere.length + ')</summary>' +
+          '<ul class="vorlagen">' + weitere.map(zeile).join('') + '</ul></details>'
+        : '') +
+      '</details>';
+  }
+
+  /* ============================================================
+   * Brennstofflieferungen
+   * ============================================================ */
+
+  var lieferMeldung = null;
+  var anspruchMeldung = null;
+  var aufgabeMeldung = null;
+  var bearbeiteLieferung = null;   // id der Lieferung im Bearbeitungsmodus
+  var bearbeiteAnspruch = null;    // id oder 'neu'
+  var bearbeiteAufgabe = null;     // id oder 'neu'
+  var bearbeiteGeraet = null;      // id oder 'neu'
+  var geraetMeldung = null;
+  var ansicht = 'alles';   // 'einfach' oder 'alles'
+  var abgleichFrage = null;   // Rückfrage beim Wiedereinschalten
+  var abgleichMeldung = null;
+  var belegFormular = false;
+  var belegMeldung = null;
+  var loeschFrage = null;          // { art, id, aufgabeId }
+
+  /* Nichts wird auf einen Klick gelöscht. Der erste Klick stellt die
+     Frage, der zweite führt sie aus. */
+  function loeschKnoepfe(art, id, aufgabeId) {
+    var gefragt = loeschFrage && loeschFrage.art === art && loeschFrage.id === id;
+    if (gefragt) {
+      return '<span class="loeschfrage">Wirklich löschen? ' +
+        '<button type="button" class="knopf gefahr" data-loeschen-ja="1">Ja</button> ' +
+        '<button type="button" class="knopf zart" data-loeschen-nein="1">Abbrechen</button></span>';
+    }
+    return '<button type="button" class="knopf zart" data-loeschen-frage="' + esc(art) +
+      '" data-id="' + esc(id) + '"' + (aufgabeId ? ' data-aufgabe="' + esc(aufgabeId) + '"' : '') +
+      '>löschen</button>';
+  }
+
+  function loeschenAusfuehren() {
+    if (!loeschFrage) return;
+    var f = loeschFrage;
+    loeschFrage = null;
+
+    if (f.art === 'lieferung') {
+      geraet.lieferungen = (geraet.lieferungen || []).filter(function (x) { return x.id !== f.id; });
+      if (bearbeiteLieferung === f.id) bearbeiteLieferung = null;
+      lieferMeldung = { art: 'hinweis', text: 'Lieferung gelöscht.' };
+    } else if (f.art === 'erledigung') {
+      var auf = findeAufgabe(f.aufgabeId);
+      if (auf) {
+        auf.erledigungen = (auf.erledigungen || []).filter(function (x) { return x.id !== f.id; });
+        meldungen[f.aufgabeId] = { art: 'hinweis', text: 'Erledigung gelöscht.' };
+      }
+    } else if (f.art === 'stoerung') {
+      geraet.stoerungen = (geraet.stoerungen || []).filter(function (x) { return x.id !== f.id; });
+    } else if (f.art === 'anspruch') {
+      geraet.ansprueche = (geraet.ansprueche || []).filter(function (x) { return x.id !== f.id; });
+      if (bearbeiteAnspruch === f.id) bearbeiteAnspruch = null;
+    } else if (f.art === 'beleg') {
+      belegEntfernen(f.id);
+      return;
+    } else if (f.art === 'geraet') {
+      geraete = geraete.filter(function (x) { return x.id !== f.id; });
+      objekt.geraete = geraete;
+      if (aktivIdx >= geraete.length) aktivIdx = Math.max(0, geraete.length - 1);
+      geraet = geraete[aktivIdx] || null;
+      geraetMeldung = { art: 'hinweis', text: 'Gerät gelöscht.' };
+    } else if (f.art === 'aufgabe') {
+      geraet.aufgaben = (geraet.aufgaben || []).filter(function (x) { return x.id !== f.id; });
+      if (bearbeiteAufgabe === f.id) bearbeiteAufgabe = null;
+    }
+    sichern();
+  }
+
+  /**
+   * Welche Ansprüche hängen an einer Störung? Eine Störung zu löschen
+   * entfernt nicht automatisch die Verlängerung oder den Anspruch, der
+   * daraus entstanden ist – das muss sichtbar sein, sonst bleibt eine
+   * Frist ohne Begründung stehen.
+   */
+  function abhaengigeAnsprueche(stoerungId) {
+    var treffer = [];
+    (geraet.ansprueche || []).forEach(function (a) {
+      (a.verlaengerungen || []).forEach(function (v) {
+        if (v.stoerungId === stoerungId) {
+          treffer.push('Verlängerung um ' + v.monate + ' Monate');
+        }
+      });
+    });
+    return treffer;
+  }
+
+  /* Texteingaben in ganzzahlige Einheiten wandeln, ohne den Umweg
+     über Fließkomma: der Nachkommateil wird als Zeichenkette auf
+     zwei Stellen gebracht und ganzzahlig angehängt. */
+  function zuHundertstel(text) {
+    var t = String(text == null ? '' : text).trim().replace(/\s/g, '').replace(',', '.');
+    if (!/^\d+(\.\d{0,2})?$/.test(t)) return null;
+    var teile = t.split('.');
+    var ganz = parseInt(teile[0], 10);
+    var nk = (teile[1] || '').padEnd(2, '0');
+    return ganz * 100 + parseInt(nk, 10);
+  }
+
+  function lieferungAusFeldern(id) {
+    var wert = function (f) { var e = document.getElementById(f); return e ? e.value : ''; };
+    var voll = document.getElementById('lvoll');
+
+    return {
+      id: id,
+      datum: wert('ldatum'),
+      einheit: 'liter',
+      mengeHundertstel: zuHundertstel(wert('lmenge')),
+      gesamtCent: zuHundertstel(wert('lpreis')),
+      volltankung: voll ? voll.checked : false,
+      lieferant: wert('llieferant'),
+      belegDokumentId: null
+    };
+  }
+
+  /** Prüft eine Lieferung aus dem Formular. Leere Liste heißt: in Ordnung. */
+  function lieferungPruefen(neu) {
+    var fehler = BR.pruefeLieferung(neu, F.istGueltigesDatum)
+      .filter(function (h) { return h.schwere === 'fehler'; });
+
+    if (neu.mengeHundertstel === null) {
+      fehler.push({ text: 'Die Menge ist keine gültige Zahl, zum Beispiel 2500 oder 2500,50.' });
+    }
+    if (neu.gesamtCent === null) {
+      fehler.push({ text: 'Der Preis ist keine gültige Zahl, zum Beispiel 2250,00.' });
+    }
+    if (neu.datum && F.istGueltigesDatum(neu.datum) && neu.datum > stichtagStand) {
+      fehler.push({ text: 'Das Lieferdatum liegt nach dem Stichtag.' });
+    }
+
+    return fehler;
+  }
+
+  function lieferungEintragen() {
+    var neu = lieferungAusFeldern('lf_' + Date.now());
+    var fehler = lieferungPruefen(neu);
+    if (fehler.length) {
+      lieferMeldung = { art: 'fehler', text: fehler.map(function (f) { return f.text; }).join(' ') };
+      zeichnen(); return;
+    }
+
+    geraet.lieferungen = (geraet.lieferungen || []).concat([neu]);
+    lieferMeldung = { art: 'erfolg',
+      text: BR.mengeText(neu.mengeHundertstel, 'liter') + ' für ' + BR.eurText(neu.gesamtCent) +
+            ' eingetragen (' + BR.preisText(neu) + ').' };
+    sichern();
+  }
+
+  function lieferungAendern() {
+    if (!bearbeiteLieferung) return;
+    var geaendert = lieferungAusFeldern(bearbeiteLieferung);
+    var fehler = lieferungPruefen(geaendert);
+    if (fehler.length) {
+      lieferMeldung = { art: 'fehler', text: fehler.map(function (f) { return f.text; }).join(' ') };
+      zeichnen(); return;
+    }
+
+    geraet.lieferungen = (geraet.lieferungen || []).map(function (x) {
+      if (x.id !== bearbeiteLieferung) return x;
+      /* Felder übernehmen, aber Notiz und Belegverweis behalten –
+         die stehen nicht im Formular und gingen sonst verloren. */
+      geaendert.notiz = x.notiz;
+      geaendert.belegDokumentId = x.belegDokumentId;
+      return geaendert;
+    });
+
+    bearbeiteLieferung = null;
+    lieferMeldung = { art: 'erfolg', text: 'Lieferung geändert.' };
+    sichern();
+  }
+
+  function lieferungen() {
+    var liste = BR.sortiert(geraet.lieferungen, F.istGueltigesDatum);
+    var einheit = liste.length ? liste[0].einheit : 'liter';
+
+    var zeilen = liste.slice().reverse().map(function (e) {
+      var inArbeit = bearbeiteLieferung === e.id;
+      return '<li' + (inArbeit ? ' class="inarbeit"' : '') + '>' +
+        '<span><span class="titel">' + BR.mengeText(e.mengeHundertstel, e.einheit) + '</span> ' +
+        (e.volltankung
+          ? '<span class="modus plan" title="Bis zur gewohnten Höhe befüllt">voll</span>'
+          : '<span class="modus" title="Teilbefüllung – verfälscht die Abschnittsrechnung">teilweise</span>') +
+        '<br><span class="zusatz">' + deDatum(e.datum) +
+        (e.lieferant ? ' · ' + esc(e.lieferant) : '') +
+        (e.notiz ? '<br>' + esc(e.notiz) : '') + '</span>' +
+        '<span class="zeilenknoepfe">' +
+          (inArbeit
+            ? '<span class="zusatz">wird bearbeitet</span>'
+            : '<button type="button" class="knopf zart" data-lf-bearbeiten="' + esc(e.id) + '">bearbeiten</button> ' +
+              loeschKnoepfe('lieferung', e.id)) +
+        '</span></span>' +
+        '<span class="wert">' + BR.eurText(e.gesamtCent) +
+        '<br><span class="zusatz">' + BR.preisText(e) + '</span></span></li>';
+    }).join('');
+
+    /* Gesamtspanne */
+    var sp = BR.verbrauchSpanne(geraet.lieferungen, F.istGueltigesDatum, F.tageZwischen);
+    var spanneHtml = sp.belastbar
+      ? '<div class="kennzahl">' +
+          '<div class="gross">' + BR.mengeText(Math.round(sp.proJahrHundertstel), einheit) + '</div>' +
+          '<div class="zusatz">hochgerechnet je Jahr · ' +
+          BR.eurText(Math.round(sp.kostenProTagCent * 365)) + ' Brennstoffkosten</div>' +
+          '<div class="zusatz">Grundlage: ' + BR.mengeText(sp.mengeHundertstel, einheit) +
+          ' in ' + sp.tage + ' Tagen, ' + deDatum(sp.von) + ' bis ' + deDatum(sp.bis) + '</div>' +
+        '</div>'
+      : '<p class="leerhinweis">' + esc(sp.grund) + '</p>';
+
+    /* Abschnitte */
+    var ab = BR.verbrauchsAbschnitte(geraet.lieferungen, F.istGueltigesDatum, F.tageZwischen);
+    var abHtml = ab.length
+      ? '<ul class="liste">' + ab.slice().reverse().map(function (a) {
+          return '<li><span><span class="titel">' + deDatum(a.von) + ' bis ' + deDatum(a.bis) + '</span><br>' +
+            '<span class="zusatz">' + a.tage + ' Tage · ' + BR.mengeText(a.mengeHundertstel, einheit) + '</span>' +
+            (a.belastbar ? '' : '<br><span class="warnung">' + esc(a.grund) + '</span>') + '</span>' +
+            '<span class="wert ' + (a.belastbar ? '' : 'bald') + '">' +
+            (a.proTagHundertstel / 100).toFixed(1).replace('.', ',') + ' l<br>' +
+            '<span class="zusatz">je Tag</span></span></li>';
+        }).join('') + '</ul>'
+      : '';
+
+    /* Jahre */
+    var jahre = BR.jahresUebersicht(geraet.lieferungen, F.istGueltigesDatum);
+    var jahrHtml = jahre.length
+      ? '<ul class="liste">' + jahre.slice().reverse().map(function (j) {
+          return '<li><span><span class="titel">' + esc(j.jahr) + '</span><br>' +
+            '<span class="zusatz">' + j.anzahl + ' Lieferung' + (j.anzahl > 1 ? 'en' : '') + ' · ' +
+            BR.preisText(j.schnittPreisProBezug, einheit) + ' im Schnitt</span></span>' +
+            '<span class="wert">' + BR.mengeText(j.mengeHundertstel, einheit) + '<br>' +
+            '<span class="zusatz">' + BR.eurText(j.gesamtCent) + '</span></span></li>';
+        }).join('') + '</ul>'
+      : '';
+
+    var meldung = lieferMeldung
+      ? '<p class="meldung ' + esc(lieferMeldung.art) + '">' + esc(lieferMeldung.text) + '</p>'
+      : '';
+
+    return spanneHtml +
+      '<h3 class="ablaufkopf">Verbrauch je Abschnitt</h3>' + abHtml +
+      '<h3 class="ablaufkopf">Nach Jahren</h3>' + jahrHtml +
+      '<h3 class="ablaufkopf">Lieferungen</h3>' +
+      '<ul class="liste">' + zeilen + '</ul>' +
+      lieferFormular(meldung);
+  }
+
+  /* Ein Formular für beides. Im Bearbeitungsmodus ist es vorbelegt,
+     immer offen und hat einen Abbruchknopf. */
+  function lieferFormular(meldung) {
+    var vorlage = bearbeiteLieferung
+      ? (geraet.lieferungen || []).filter(function (x) { return x.id === bearbeiteLieferung; })[0]
+      : null;
+
+    var zahl = function (h) {
+      if (!vorlage || !Number.isFinite(h)) return '';
+      return (h / 100).toFixed(2).replace('.', ',');
+    };
+
+    return '<details class="katalog"' + (bearbeiteLieferung ? ' open' : '') + '>' +
+      '<summary>' + (vorlage ? 'Lieferung bearbeiten' : 'Lieferung eintragen') + '</summary>' +
+        '<div class="felder">' +
+          '<label class="feld"><span>Datum</span><input type="date" id="ldatum" max="' +
+            esc(stichtagStand) + '" value="' + esc(vorlage ? vorlage.datum : '') + '"></label>' +
+          '<label class="feld"><span>Menge in Litern</span><input type="text" id="lmenge" inputmode="decimal" placeholder="2500" value="' +
+            esc(vorlage ? zahl(vorlage.mengeHundertstel) : '') + '"></label>' +
+          '<label class="feld"><span>Gesamtpreis in Euro</span><input type="text" id="lpreis" inputmode="decimal" placeholder="2250,00" value="' +
+            esc(vorlage ? zahl(vorlage.gesamtCent) : '') + '"></label>' +
+          '<label class="feld"><span>Lieferant</span><input type="text" id="llieferant" placeholder="Name" value="' +
+            esc(vorlage ? (vorlage.lieferant || '') : '') + '"></label>' +
+        '</div>' +
+        '<label class="schalter"><input type="checkbox" id="lvoll"' +
+          (!vorlage || vorlage.volltankung ? ' checked' : '') + '> ' +
+        'bis zur gewohnten Höhe befüllt</label>' +
+        '<p class="zusatz">Ohne diese Angabe lässt sich der Verbrauch zwischen zwei Lieferungen nicht belastbar berechnen.</p>' +
+        meldung +
+        (vorlage
+          ? '<button type="button" class="knopf" data-lf-speichern="1">Änderung speichern</button> ' +
+            '<button type="button" class="knopf zart" data-lf-abbrechen="1">Abbrechen</button>'
+          : '<button type="button" class="knopf" data-lieferung="1">Eintragen</button>') +
+      '</details>';
+  }
+
+  /* Schreibt und zeichnet neu. Der Schreibvorgang läuft weiter,
+     auch wenn die Anzeige schon aktualisiert ist – scheitert er,
+     erscheint die Meldung in der Kopfzeile. */
+  function sichern() {
+    zeichnen();
+    return window.App.speichern().then(function (r) {
+      if (!r.erfolg) zeichnen();
+      return r;
+    });
+  }
+
+  function ansichtWahl() {
+    return '<div class="ansichtwahl">' +
+      '<button type="button" class="reiter klein' + (ansicht === 'einfach' ? ' aktiv' : '') +
+        '" data-ansicht="einfach">Einfach</button>' +
+      '<button type="button" class="reiter klein' + (ansicht === 'alles' ? ' aktiv' : '') +
+        '" data-ansicht="alles">Alles</button>' +
+      '</div>';
+  }
+
+  /**
+   * Einfache Ansicht: Gerät, wo gekauft, Rechnungen. Sonst nichts.
+   * Fristen, Wartung und Störungen bleiben bewusst draußen – wer sie
+   * braucht, schaltet um.
+   */
+  function einfacheAnsicht() {
+    var i = geraet.identitaet || {};
+    var nummern = nummernAusGeraet(geraet).filter(function (n) { return n && n.wert; });
+
+    var zeile = function (label, wert) {
+      var leer = !wert || !String(wert).trim();
+      return '<div class="paar"><dt>' + esc(label) + '</dt>' +
+        '<dd class="' + (leer ? 'leer' : '') + '">' + esc(leer ? 'nicht erfasst' : wert) + '</dd></div>';
+    };
+
+    /* Der wichtigste Anspruch für die einfache Ansicht: der, der das
+       ganze Gerät abdeckt und am längsten läuft. Gibt es nur
+       Bauteilansprüche, wird der längste davon gezeigt und als solcher
+       benannt – sonst hält man ihn für eine Gerätegarantie. */
+    var bester = (function () {
+      var kandidaten = [];
+      (geraet.ansprueche || []).forEach(function (a) {
+        if (a.aktiv === false) return;
+        try {
+          kandidaten.push({ a: a, auskunft: F.anspruchsAuskunft(a, stichtagStand, 30) });
+        } catch (e) { /* unvollständige Ansprüche bleiben draußen */ }
+      });
+      if (!kandidaten.length) return null;
+
+      var ganzes = kandidaten.filter(function (k) { return k.a.bezug !== 'bauteil'; });
+      var pool = ganzes.length ? ganzes : kandidaten;
+      return pool.reduce(function (x, y) { return y.auskunft.ende > x.auskunft.ende ? y : x; });
+    })();
+
+    var schutz = bester
+      ? '<section><h2>' + esc(ARTTEXT[bester.a.art] || 'Anspruch') + '</h2>' +
+          '<div class="schutzblock ' + esc(bester.auskunft.status) + '">' +
+            '<div class="gross">bis ' + deDatum(bester.auskunft.ende) + '</div>' +
+            '<div class="zusatz">' + esc(restText(bester.auskunft.status, bester.auskunft.restTage)) +
+            ' · ' + esc(bester.auskunft.ansprechpartner) +
+            (bester.auskunft.ansprechpartnerName ? ': ' + esc(bester.auskunft.ansprechpartnerName) : '') +
+            '</div>' +
+            (bester.a.bezug === 'bauteil'
+              ? '<div class="zusatz">Gilt nur für ' + esc(bester.a.bauteil || 'ein Bauteil') +
+                ', nicht für das ganze Gerät.</div>'
+              : '') +
+          '</div></section>'
+      : '';
+
+    var belege = (geraet.dokumente || []).filter(function (d) {
+      return d.typ === 'kaufbeleg' || d.typ === 'reparaturrechnung';
+    });
+
+    var belegListe = belege.length
+      ? '<ul class="liste">' + belege.map(function (d) {
+          return '<li><span><span class="marke ' + esc(d.typ) + '">' +
+            esc(TYPTEXT[d.typ] || d.typ) + '</span><span class="titel">' + esc(d.titel) + '</span></span>' +
+            '<span class="wert">' + deDatum(d.erstellt) + '</span></li>';
+        }).join('') + '</ul>'
+      : '<p class="leerhinweis">Noch keine Rechnung hinterlegt.</p>';
+
+    belegListe += (belegMeldung
+      ? '<p class="meldung ' + esc(belegMeldung.art) + '">' + esc(belegMeldung.text) + '</p>'
+      : '') + belegFormularHtml();
+
+    return '<div class="schild">' +
+        '<h1>' + esc(geraet.name) + '</h1>' +
+        '<p class="ort">' + esc(geraet.standort) + '</p>' +
+        '<dl class="paare">' +
+          zeile('Hersteller', i.hersteller) +
+          zeile('Modell', i.modell) +
+          (nummern.length ? zeile('Nummer', nummern[0].wert) : '') +
+        '</dl></div>' +
+
+      '<section><h2>Gekauft</h2>' +
+        '<ul class="liste">' +
+          '<li><span><span class="titel">' +
+            esc(geraet.kauf.verkaeufer || 'Verkäufer nicht erfasst') + '</span><br>' +
+            '<span class="zusatz">am ' + deDatum(geraet.kauf.datum) + '</span></span>' +
+            '<span class="wert">' +
+            (geraet.kauf.preisCent
+              ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' €'
+              : '') + '</span></li>' +
+        '</ul>' +
+      '</section>' +
+
+      schutz +
+
+      '<section><h2>Rechnungen</h2>' + belegListe + '</section>' +
+
+      '<p class="umschalthinweis">Fristen, Wartung und Störungen sind ausgeblendet. ' +
+      'Über <b>Alles</b> oben werden sie wieder sichtbar.</p>';
+  }
+
+  function lagezeile() {
+    var sp = window.App.zustand.speicher;
+    var sy = window.App.zustand.sync;
+    var dauerhaft = sp ? sp.zustand().dauerhaft : false;
+    var an = sy ? sy.istAktiv() : false;
+    var verbunden = sy && sy.zustand().drive !== 'aus';
+
+    return '<p class="lage' + (dauerhaft ? '' : ' fluechtig') + (an ? '' : ' abgeschaltet') + '">' +
+      esc(window.App.lageText()) +
+      (verbunden
+        ? ' <button type="button" class="knopf zart" data-abgleich="' +
+          (an ? 'aus' : 'an') + '">Abgleich ' + (an ? 'abschalten' : 'einschalten') + '</button>'
+        : '') +
+      ' <button type="button" class="knopf zart" data-zuruecksetzen="1">Demodaten zurücksetzen</button></p>' +
+      (abgleichMeldung
+        ? '<p class="meldung ' + esc(abgleichMeldung.art) + '">' + esc(abgleichMeldung.text) + '</p>'
+        : '') +
+      abgleichDialog();
+  }
+
+  function standText(b) {
+    if (!b) return 'leer';
+    return b.geraete + ' Geräte, ' + b.eintraege + ' Einträge' +
+      (b.geaendert ? ', zuletzt geändert ' + deDatum(String(b.geaendert).slice(0, 10)) : '');
+  }
+
+  /* Beim Wiedereinschalten wird gefragt statt geraten. */
+  function abgleichDialog() {
+    if (!abgleichFrage) return '';
+    return '<div class="abgleichfrage">' +
+      '<h3>Welcher Stand soll gelten?</h3>' +
+      '<p class="zusatz">Während der Abgleich aus war, haben sich beide Seiten verändert. ' +
+      'Die nicht gewählte Seite wird überschrieben.</p>' +
+      '<ul class="wahlliste">' +
+        '<li><b>Dieses Gerät</b><br><span class="zusatz">' + esc(standText(abgleichFrage.lokal)) + '</span><br>' +
+          '<button type="button" class="knopf" data-wahl="lokal">Diesen behalten</button></li>' +
+        '<li><b>Drive</b><br><span class="zusatz">' + esc(standText(abgleichFrage.fern)) + '</span><br>' +
+          '<button type="button" class="knopf" data-wahl="fern">Drive übernehmen</button></li>' +
+        '<li><b>Beide zusammenführen</b><br><span class="zusatz">Je Gerät gewinnt der neuere Stand. ' +
+          'Nichts geht verloren, was nur auf einer Seite existiert.</span><br>' +
+          '<button type="button" class="knopf zart" data-wahl="zusammen">Zusammenführen</button></li>' +
+      '</ul>' +
+      (abgleichFrage.empfehlung
+        ? '<p class="zusatz">Neuer ist: ' +
+          (abgleichFrage.empfehlung === 'fern' ? 'Drive' : 'dieses Gerät') + '.</p>'
+        : '') +
+      '<button type="button" class="knopf zart" data-wahl-abbrechen="1">Abbrechen, aus lassen</button>' +
+      '</div>';
+  }
+
+  function geraetKnoepfe() {
+    var inhalt = geraetInhalt(geraet);
+    var gefragt = loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id;
+    return '<div class="geraetknoepfe">' +
+      '<button type="button" class="knopf zart" data-ge-bearbeiten="' + esc(geraet.id) + '">Gerät bearbeiten</button> ' +
+      '<button type="button" class="knopf zart" data-ge-neu="1">Neues Gerät</button> ' +
+      (geraete.length > 1 ? loeschKnoepfe('geraet', geraet.id) : '') +
+      (gefragt && inhalt.length
+        ? '<div class="warnung">Mit dem Gerät verschwinden: ' + esc(inhalt.join(', ')) + '.</div>'
+        : '') +
+      (geraetMeldung
+        ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
+        : '') +
+      '</div>';
+  }
+
+  function geraeteWahl() {
+    return '<p class="zurueck"><a href="index.html">Zur Übersicht ' +
+      esc(objekt.name) + '</a></p>' +
+      '<div class="wahl">' + geraete.map(function (g, i) {
+      return '<button type="button" class="reiter' + (i === aktivIdx ? ' aktiv' : '') +
+             '" data-geraet="' + i + '">' + esc(g.name) + '</button>';
+    }).join('') + '</div>';
+  }
+
+  function fussnote() {
+    return '<p class="fussnote">Alle Fristen sind Orientierungswerte und ersetzen keine Rechtsberatung. ' +
+      'Maßgeblich sind die Belege und die vertraglichen Vereinbarungen.</p>';
+  }
+
+  function zeichneHtml(html) {
+    var huelle = document.getElementById('huelle');
+    huelle.innerHTML = html;
+    nachZeichnen(huelle);
+  }
+
+  function zeichnen() {
+    hinweisZaehler = 0;
+    geraet = geraete[aktivIdx];
+    var sucheFeld = document.getElementById('suche');
+    var stichtagFeld = document.getElementById('stichtag');
+    var suche = sucheFeld ? sucheFeld.value : '';
+    if (stichtagFeld && F.istGueltigesDatum(stichtagFeld.value)) {
+      stichtagStand = stichtagFeld.value;
+    }
+    var stichtag = stichtagStand;
+
+    var aktive = geraet.ansprueche.filter(function (a) { return a.aktiv !== false; });
+
+    /* Zahlen für die Kopfzeilen der Blöcke. */
+    var zaehlwerk = (function () {
+      var abgelaufen = 0, laufend = 0;
+      aktive.forEach(function (a) {
+        try {
+          var st = F.anspruchsAuskunft(a, stichtag, 30).status;
+          if (st === 'abgelaufen') abgelaufen += 1; else laufend += 1;
+        } catch (e) { /* fehlerhafte Ansprüche zählen nirgends mit */ }
+      });
+
+      var offen = 0, gesamt = 0;
+      (geraet.aufgaben || []).forEach(function (auf) {
+        var f = F.naechsteFaelligkeit(auf, stichtag);
+        if (!f || f.fehler) return;
+        gesamt += 1;
+        if (f.status === 'abgelaufen' || f.status === 'bald' || f.status === 'laeuft_heute_ab') offen += 1;
+      });
+
+      var brennText = '';
+      if (geraet.lieferungen && geraet.lieferungen.length) {
+        var sp = BR.verbrauchSpanne(geraet.lieferungen, F.istGueltigesDatum, F.tageZwischen);
+        brennText = sp.belastbar
+          ? BR.mengeText(Math.round(sp.proJahrHundertstel), geraet.lieferungen[0].einheit) + ' im Jahr'
+          : geraet.lieferungen.length + ' Lieferungen';
+      }
+
+      return {
+        anspruchText: abgelaufen ? abgelaufen + ' abgelaufen, ' + laufend + ' laufend'
+                                 : laufend + ' laufend',
+        anspruchDringend: abgelaufen > 0,
+        wartungText: offen ? offen + ' von ' + gesamt + ' fällig' : gesamt + ' Aufgaben',
+        wartungDringend: offen > 0,
+        brennstoffText: brennText,
+        stoerungText: (geraet.stoerungen || []).length
+          ? (geraet.stoerungen || []).length + ' erfasst' : 'keine erfasst',
+        dokumentText: (geraet.dokumente || []).length + ' Dateien'
+      };
+    })();
+
+    /* In der einfachen Ansicht endet die Seite nach den Rechnungen.
+       Kein Ausblenden per CSS, sondern gar nicht erst aufbauen. */
+    if (ansicht === 'einfach') {
+      zeichneHtml(geraeteWahl() + ansichtWahl() + einfacheAnsicht() + fussnote());
+      return;
+    }
+
+    var html =
+      geraeteWahl() +
+      ansichtWahl() +
+      lagezeile() +
+      (bearbeiteGeraet
+        ? geraetFormular(bearbeiteGeraet === 'neu' ? leeresGeraet() : geraet)
+        : schild() + geraetKnoepfe()) +
+      '<div class="werkzeuge">' +
+        '<input type="search" id="suche" placeholder="Seriennummer, Beleg, Bauteil …" value="' + esc(suche) + '">' +
+        '<input type="date" id="stichtag" value="' + esc(stichtag) + '" aria-label="Stichtag">' +
+      '</div>' +
+      '<p class="stichtag-hinweis">Stichtag frei wählbar, um Fristen zu prüfen.</p>' +
+
+      block('ansprueche', 'Gewährleistung und Garantie',
+        zaehlwerk.anspruchText,
+        (aktive.length > 1
+          ? '<p class="unterzeile">Mehrere Ansprüche laufen parallel, mit verschiedenen Ansprechpartnern.</p>'
+          : '') +
+        aktive.map(function (a) { return anspruchZeile(a, stichtag); }).join('') +
+        (bearbeiteAnspruch === 'neu' ? anspruchFormular(leererAnspruch()) : '') +
+        (anspruchMeldung
+          ? '<p class="meldung ' + esc(anspruchMeldung.art) + '">' + esc(anspruchMeldung.text) + '</p>'
+          : '') +
+        (bearbeiteAnspruch ? '' :
+          '<button type="button" class="knopf zart" data-an-neu="1">Anspruch hinzufügen</button>'),
+        zaehlwerk.anspruchDringend) +
+
+      block('wartung', 'Wartung', zaehlwerk.wartungText,
+        wartung(stichtag) + vorlagenListe(), zaehlwerk.wartungDringend) +
+
+      (geraet.lieferungen
+        ? block('brennstoff', 'Brennstoff', zaehlwerk.brennstoffText,
+            '<p class="unterzeile">Aus den Lieferungen ergibt sich der Verbrauch – belastbar nur, wenn bis zur gewohnten Höhe befüllt wurde.</p>' +
+            lieferungen(), false)
+        : '') +
+
+      block('stoerungen', 'Störungen und Reparaturen', zaehlwerk.stoerungText,
+        '<p class="unterzeile">Zwei Angaben entscheiden, was rechtlich folgt: wer repariert hat und ob du bezahlt hast.</p>' +
+        stoerungsAblauf() +
+        '<h3 class="ablaufkopf">Verlauf</h3>' + historie(), false) +
+
+      block('dokumente', 'Dokumente', zaehlwerk.dokumentText, dokumente(suche), false) +
+
+      fussnote();
+
+    zeichneHtml(html);
+
+    /* Der Ablauf wird bei jedem Neuaufbau neu erzeugt – Eingaben
+       kommen aus dem Zustandsobjekt zurück, damit nichts verloren geht. */
+    /* nur noch Verdrahtung; der Aufbau steckt in zeichnen() */
+  }
+
+  function nachZeichnen(huelle) {
+    /* Auf- und Zuklappen merken, ohne neu zu zeichnen. */
+    var bloecke = huelle.querySelectorAll('details.block');
+    for (var bi = 0; bi < bloecke.length; bi++) {
+      (function (el) {
+        el.addEventListener('toggle', function () {
+          var k = el.getAttribute('data-block');
+          if (k) offeneBloecke[k] = el.open;
+        });
+      })(bloecke[bi]);
+    }
+
+    /* Vorschau der berechneten Frist. Schreibt nur in ein einzelnes
+       Element – ein Neuzeichnen würde den Fokus aus dem Feld reißen. */
+    function vorschauAnspruch() {
+      var ziel = document.getElementById('an_vorschau');
+      if (!ziel) return;
+      var vorlage = bearbeiteAnspruch === 'neu' ? leererAnspruch()
+        : (geraet.ansprueche || []).filter(function (x) { return x.id === bearbeiteAnspruch; })[0];
+      if (!vorlage) return;
+      try {
+        var a = anspruchAusFeldern(vorlage);
+        var fehler = anspruchPruefen(a);
+        ziel.textContent = fehler.length ? '—' : deDatum(F.berechneAnspruchEnde(a).ende);
+      } catch (e) { ziel.textContent = '—'; }
+    }
+
+    function vorschauAufgabe() {
+      var ziel = document.getElementById('au_vorschau');
+      if (!ziel) return;
+      var vorlage = bearbeiteAufgabe === 'neu' ? leereAufgabe() : findeAufgabe(bearbeiteAufgabe);
+      if (!vorlage) return;
+      var auf = aufgabeAusFeldern(vorlage);
+      if (aufgabePruefen(auf).length) { ziel.textContent = '—'; return; }
+      var f = F.naechsteFaelligkeit(auf, stichtagStand);
+      ziel.textContent = (f && f.faellig) ? deDatum(f.faellig) : '—';
+    }
+
+    ['an_art','an_rolle','an_name','an_bezug','an_bauteil','an_beginnkey',
+     'an_beginn','an_dauer','an_manuell','an_grundlage','an_aktiv'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.addEventListener('input', vorschauAnspruch); el.addEventListener('change', vorschauAnspruch); }
+    });
+    ['au_titel','au_wert','au_einheit','au_basis','au_anker','au_vorlauf','au_aktiv'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) { el.addEventListener('input', vorschauAufgabe); el.addEventListener('change', vorschauAufgabe); }
+    });
+
+    var herstFeld = document.getElementById('ge_hersteller');
+    if (herstFeld) {
+      herstFeld.addEventListener('change', function () {
+        var ziel = document.getElementById('ge_nummern');
+        if (!ziel) return;
+        /* Bereits getippte Werte retten, bevor das Schema wechselt. */
+        var bisher = [];
+        var alt = document.querySelectorAll('.ge_nummer');
+        for (var i = 0; i < alt.length; i++) {
+          if (alt[i].value) bisher.push({ art: alt[i].getAttribute('data-art'), wert: alt[i].value });
+        }
+        ziel.innerHTML = nummernFelder(this.value, bisher);
+      });
+    }
+    var katFeld = document.getElementById('ge_kategorie');
+    if (katFeld) {
+      katFeld.addEventListener('change', function () {
+        var ziel = document.getElementById('ge_stufe');
+        if (!ziel) return;
+        var u = SH.bewerteAnliegen(this.value, '');
+        ziel.textContent = STUFENTEXT[u.stufe] || '';
+        ziel.className = 'stufenzeile ' + u.stufe;
+      });
+    }
+
+    var symFeld = document.getElementById('sym');
+    if (symFeld) {
+      symFeld.addEventListener('input', function () { ablauf.symptom = this.value; });
+    }
+    ['traeger', 'bezahlt', 'abnahme', 'firma'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', function () { ablaufLesen(); });
+    });
+
+    /* Diese beiden gehören zum Objekt und wurden bisher nur im
+       Arbeitsspeicher geändert – ohne sichern() war die Einstellung
+       nach dem Neuladen wieder weg. */
+    var nutz = document.getElementById('knutzung');
+    if (nutz) nutz.addEventListener('change', function () {
+      objektKontext.nutzung = this.value;
+      objekt.gebaeude = objektKontext;
+      vorlagenMeldung = null; sichern();
+    });
+    var einh = document.getElementById('keinheiten');
+    if (einh) einh.addEventListener('change', function () {
+      var n = parseInt(this.value, 10);
+      objektKontext.einheiten = (n > 0 && n < 1000) ? n : 1;
+      objekt.gebaeude = objektKontext;
+      vorlagenMeldung = null; sichern();
+    });
+
+    var s = document.getElementById('suche');
+    s.addEventListener('input', function () {
+      var pos = this.selectionStart, wert = this.value;
+      zeichnen();
+      var neu = document.getElementById('suche');
+      neu.focus();
+      neu.value = wert;
+      try { neu.setSelectionRange(pos, pos); } catch (e) {}
+    });
+    document.getElementById('stichtag').addEventListener('change', zeichnen);
+  }
+
+  /* Hinweisblasen: einmalig delegiert, damit Neuaufbauten nichts doppeln.
+     Hover deckt nur Mauszeiger ab, Tippen und Tastatur brauchen dies hier. */
+  function alleSchliessen(ausser) {
+    var knoepfe = document.querySelectorAll('.hinweis > button[aria-expanded="true"]');
+    for (var i = 0; i < knoepfe.length; i++) {
+      if (knoepfe[i] !== ausser) knoepfe[i].setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+
+    var erledigt = e.target.closest('[data-erledigt]');
+    if (erledigt) {
+      alleSchliessen(null);
+      erledigungEintragen(erledigt.getAttribute('data-erledigt'), stichtagStand);
+      return;
+    }
+
+    var ausFeld = e.target.closest('[data-erledigt-feld]');
+    if (ausFeld) {
+      alleSchliessen(null);
+      var id = ausFeld.getAttribute('data-erledigt-feld');
+      var feld = document.getElementById('dat_' + id);
+      erledigungEintragen(id, feld ? feld.value : '');
+      return;
+    }
+
+    if (e.target.closest('[data-zuruecksetzen]')) {
+      alleSchliessen(null);
+      window.App.zuruecksetzen().then(function () { window.location.reload(); });
+      return;
+    }
+
+    var reiter = e.target.closest('[data-geraet]');
+    if (reiter) {
+      alleSchliessen(null);
+      aktivIdx = parseInt(reiter.getAttribute('data-geraet'), 10) || 0;
+      vorlagenMeldung = null; lieferMeldung = null;
+      ablauf.ergebnis = null; ablauf.meldung = null;
+      meldungen = {};
+      zeichnen(); return;
+    }
+    if (e.target.closest('[data-lieferung]')) { alleSchliessen(null); lieferungEintragen(); return; }
+
+    var lfBearbeiten = e.target.closest('[data-lf-bearbeiten]');
+    if (lfBearbeiten) {
+      alleSchliessen(null);
+      bearbeiteLieferung = lfBearbeiten.getAttribute('data-lf-bearbeiten');
+      loeschFrage = null; lieferMeldung = null;
+      zeichnen(); return;
+    }
+    if (e.target.closest('[data-lf-speichern]')) { alleSchliessen(null); lieferungAendern(); return; }
+    if (e.target.closest('[data-lf-abbrechen]')) {
+      alleSchliessen(null);
+      bearbeiteLieferung = null;
+      lieferMeldung = { art: 'hinweis', text: 'Bearbeitung abgebrochen, nichts geändert.' };
+      zeichnen(); return;
+    }
+
+    if (e.target.closest('[data-beleg-neu]')) {
+      alleSchliessen(null); belegFormular = true; belegMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-beleg-speichern]')) { alleSchliessen(null); belegAufnehmen(); return; }
+    if (e.target.closest('[data-beleg-abbrechen]')) {
+      alleSchliessen(null); belegFormular = false;
+      belegMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts aufgenommen.' };
+      zeichnen(); return;
+    }
+    var blOeffnen = e.target.closest('[data-beleg-oeffnen]');
+    if (blOeffnen) {
+      alleSchliessen(null); belegOeffnen(blOeffnen.getAttribute('data-beleg-oeffnen')); return;
+    }
+
+    var abg = e.target.closest('[data-abgleich]');
+    if (abg) {
+      alleSchliessen(null);
+      var sy = window.App.zustand.sync;
+      if (abg.getAttribute('data-abgleich') === 'aus') {
+        abgleichMeldung = { art: 'hinweis', text: sy.warnungAbschalten() };
+        sy.abschalten().then(zeichnen);
+      } else {
+        abgleichMeldung = null;
+        sy.einschalten().then(function (r) {
+          if (r.fehler) { abgleichMeldung = { art: 'fehler', text: r.fehler }; }
+          else if (r.entscheidungNoetig) { abgleichFrage = r; }
+          else { abgleichMeldung = { art: 'erfolg',
+            text: 'Abgleich eingeschaltet. ' + (r.begruendung || '') }; }
+          zeichnen();
+        });
+      }
+      zeichnen(); return;
+    }
+
+    var wahl = e.target.closest('[data-wahl]');
+    if (wahl) {
+      alleSchliessen(null);
+      var w = wahl.getAttribute('data-wahl');
+      abgleichFrage = null;
+      window.App.zustand.sync.entscheidung(w).then(function (r) {
+        if (r.daten) { objekt = r.daten; geraete = objekt.geraete || [];
+          if (aktivIdx >= geraete.length) aktivIdx = 0;
+          geraet = geraete[aktivIdx];
+          objektKontext = objekt.gebaeude || objektKontext; }
+        abgleichMeldung = { art: 'erfolg', text: 'Abgleich eingeschaltet, ' + r.quelle + '.' };
+        zeichnen();
+      });
+      zeichnen(); return;
+    }
+    if (e.target.closest('[data-wahl-abbrechen]')) {
+      alleSchliessen(null); abgleichFrage = null;
+      abgleichMeldung = { art: 'hinweis', text: 'Abgleich bleibt abgeschaltet.' };
+      zeichnen(); return;
+    }
+
+    var umschalt = e.target.closest('[data-ansicht]');
+    if (umschalt) {
+      alleSchliessen(null);
+      ansicht = umschalt.getAttribute('data-ansicht');
+      window.App.einstellungSetzen('ansicht', ansicht);
+      zeichnen(); return;
+    }
+
+    var geBearb = e.target.closest('[data-ge-bearbeiten]');
+    if (geBearb) {
+      alleSchliessen(null);
+      bearbeiteGeraet = geBearb.getAttribute('data-ge-bearbeiten');
+      loeschFrage = null; geraetMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-ge-neu]')) {
+      alleSchliessen(null); bearbeiteGeraet = 'neu'; geraetMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-ge-speichern]')) { alleSchliessen(null); geraetSpeichern(); return; }
+    if (e.target.closest('[data-ge-abbrechen]')) {
+      alleSchliessen(null); bearbeiteGeraet = null;
+      geraetMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
+      zeichnen(); return;
+    }
+
+    var anBearb = e.target.closest('[data-an-bearbeiten]');
+    if (anBearb) {
+      alleSchliessen(null);
+      bearbeiteAnspruch = anBearb.getAttribute('data-an-bearbeiten');
+      loeschFrage = null; anspruchMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-an-neu]')) {
+      alleSchliessen(null); bearbeiteAnspruch = 'neu'; anspruchMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-an-speichern]')) { alleSchliessen(null); anspruchSpeichern(); return; }
+    if (e.target.closest('[data-an-abbrechen]')) {
+      alleSchliessen(null); bearbeiteAnspruch = null;
+      anspruchMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
+      zeichnen(); return;
+    }
+
+    var auBearb = e.target.closest('[data-au-bearbeiten]');
+    if (auBearb) {
+      alleSchliessen(null);
+      bearbeiteAufgabe = auBearb.getAttribute('data-au-bearbeiten');
+      loeschFrage = null; aufgabeMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-au-neu]')) {
+      alleSchliessen(null); bearbeiteAufgabe = 'neu'; aufgabeMeldung = null; zeichnen(); return;
+    }
+    if (e.target.closest('[data-au-speichern]')) { alleSchliessen(null); aufgabeSpeichern(); return; }
+    if (e.target.closest('[data-au-abbrechen]')) {
+      alleSchliessen(null); bearbeiteAufgabe = null;
+      aufgabeMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
+      zeichnen(); return;
+    }
+
+    var frage = e.target.closest('[data-loeschen-frage]');
+    if (frage) {
+      alleSchliessen(null);
+      loeschFrage = {
+        art: frage.getAttribute('data-loeschen-frage'),
+        id: frage.getAttribute('data-id'),
+        aufgabeId: frage.getAttribute('data-aufgabe')
+      };
+      zeichnen(); return;
+    }
+    if (e.target.closest('[data-loeschen-ja]')) { alleSchliessen(null); loeschenAusfuehren(); return; }
+    if (e.target.closest('[data-loeschen-nein]')) {
+      alleSchliessen(null); loeschFrage = null; zeichnen(); return;
+    }
+
+    var vorl = e.target.closest('[data-vorlage]');
+    if (vorl) { alleSchliessen(null); vorlageHinzufuegen(vorl.getAttribute('data-vorlage')); return; }
+
+    if (e.target.closest('[data-pruefen]')) { alleSchliessen(null); ablaufLesen(); zeichnen(); return; }
+    if (e.target.closest('[data-folge]'))   { alleSchliessen(null); folgeBerechnen(); return; }
+    if (e.target.closest('[data-uebernehmen]')) { alleSchliessen(null); folgeUebernehmen(); return; }
+    if (e.target.closest('[data-verwerfen]')) {
+      alleSchliessen(null); ablauf.ergebnis = null;
+      ablauf.meldung = { art: 'hinweis', text: 'Vorschau verworfen, nichts gespeichert.' };
+      zeichnen(); return;
+    }
+
+    var zurueck = e.target.closest('[data-rueckgaengig]');
+    if (zurueck) {
+      alleSchliessen(null);
+      erledigungEntfernen(zurueck.getAttribute('data-rueckgaengig'), zurueck.getAttribute('data-eintrag'));
+      return;
+    }
+
+    var knopf = e.target.closest('.hinweis > button');
+    if (!knopf) { alleSchliessen(null); return; }
+    e.preventDefault();
+    var offen = knopf.getAttribute('aria-expanded') === 'true';
+    alleSchliessen(knopf);
+    knopf.setAttribute('aria-expanded', offen ? 'false' : 'true');
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var offen = document.querySelector('.hinweis > button[aria-expanded="true"]');
+    if (!offen) return;
+    alleSchliessen(null);
+    offen.focus();
+  });
+
+  function starten() {
+    window.App.starten().then(function (z) {
+      if (!z.objekt) {
+        document.getElementById('huelle').innerHTML =
+          '<div class="fehlerkasten"><h2>Keine Daten</h2><p>Es konnte kein Datenstand geladen werden.</p></div>';
+        return;
+      }
+      objekt = z.objekt;
+      geraete = objekt.geraete || [];
+      objektKontext = objekt.gebaeude || objektKontext;
+      aktivIdx = startIndex();
+      geraet = geraete[aktivIdx];
+      return window.App.einstellungLesen('ansicht', 'alles').then(function (a) {
+        ansicht = (a === 'einfach') ? 'einfach' : 'alles';
+        zeichnen();
+      });
+    }).catch(function (e) {
+      document.getElementById('huelle').innerHTML =
+        '<div class="fehlerkasten"><h2>Start fehlgeschlagen</h2><p>' + esc(e.message) + '</p></div>';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', starten);
+  } else {
+    starten();
+  }
+})();
+</script>
+</body>
+</html>

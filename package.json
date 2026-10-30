@@ -1,0 +1,15 @@
+{
+  "name": "homeiq",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Haushalts- und Geräteverwaltung: Fristen, Wartung, Ansprüche, Brennstoff",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/lauf.js",
+    "assets": "node tools/assets-kopieren.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "server.js"
+}
