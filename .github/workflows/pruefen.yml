@@ -1,0 +1,23 @@
+# Läuft bei jedem Push und jedem Pull Request.
+# Zweck: nichts kommt in den Hauptzweig, das die Tests bricht.
+
+name: Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Kein npm install: das Projekt hat keine Abhängigkeiten.
+      - name: Tests
+        run: npm test
