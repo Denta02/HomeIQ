@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+test
+tools
+docs
+android
+*.md
+.editorconfig
+jsconfig.json
