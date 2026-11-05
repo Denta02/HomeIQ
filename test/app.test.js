@@ -31,15 +31,21 @@ function fenster(lager) {
   const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
     else {fehler++; console.log('FEHLER: '+n+'\n  ist:  '+JSON.stringify(i)+'\n  soll: '+JSON.stringify(s));} };
 
-  // Sitzung 1: Start mit leerem Speicher
+  // Sitzung 1: Start mit leerem Speicher -> leeres Zuhause, keine Demodaten
   const w1 = fenster(lager);
   const z1 = await w1.App.starten();
-  p('Demodaten als Anfangsbestand', z1.ersteinrichtung, true);
-  p('Objekt da', z1.objekt.name, 'Haus Musterstraße 5');
+  p('leerer Anfangsbestand', z1.objekt.geraete.length, 0);
+  p('Vorgabename', z1.objekt.name, 'Mein Zuhause');
   p('in den Speicher geschrieben', Object.keys(lager).includes('homeiq:objekt'), true);
 
+  // Beispieldaten auf Knopfdruck
+  const bsp = await w1.App.demodatenLaden();
+  p('Beispieldaten geladen', bsp.erfolg, true);
+  p('zwei Geraete', bsp.objekt.geraete.length, 2);
+  p('Objekt uebernommen', bsp.objekt.name, 'Haus Musterstraße 5');
+
   // Änderung: Erledigung an einer Aufgabe
-  const laptop = z1.objekt.geraete[0];
+  const laptop = bsp.objekt.geraete[0];
   laptop.aufgaben[0].erledigungen.push({ id:'erl_neu', datum:'2028-06-01', ausfuehrender:'selbst' });
   const r = await w1.App.speichern();
   p('Speichern erfolgreich', r.erfolg, true);
@@ -47,7 +53,6 @@ function fenster(lager) {
   // Sitzung 2: frischer Start, gleicher Speicher
   const w2 = fenster(lager);
   const z2 = await w2.App.starten();
-  p('kein Erstaufbau mehr', z2.ersteinrichtung, false);
   p('Erledigung ueberlebt',
     z2.objekt.geraete[0].aufgaben[0].erledigungen.some(e=>e.id==='erl_neu'), true);
   p('Lieferungen unveraendert', z2.objekt.geraete[1].lieferungen.length, 4);
@@ -69,8 +74,8 @@ function fenster(lager) {
   p('Speicher geleert', lager['homeiq:objekt'], undefined);
   const w4 = fenster(lager);
   const z4 = await w4.App.starten();
-  p('wieder Demodaten', z4.objekt.geraete[0].aufgaben[0].erledigungen.some(e=>e.id==='erl_neu'), false);
-  p('Erstaufbau erneut', z4.ersteinrichtung, true);
+  p('nach dem Leeren ohne Geraete', z4.objekt.geraete.length, 0);
+  p('frischer Vorgabename', z4.objekt.name, 'Mein Zuhause');
 
   // Lagetext
   p('Lagetext nennt Speicher', w4.App.lageText().indexOf('lokal gespeichert')!==-1, true);
