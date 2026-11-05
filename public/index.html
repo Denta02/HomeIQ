@@ -3,251 +3,231 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Übersicht – HomeIQ</title>
+<title>HomeIQ</title>
 <style>
   :root {
-    --papier:      #E9EEEF;
-    --flaeche:     #F8FAFA;
-    --tinte:       #12313A;
-    --tinte-leise: #58707A;
-    --linie:       #BCCBCF;
-    --linie-fein:  #D8E2E4;
+    --papier:   #F2F5F5;
+    --karte:    #FFFFFF;
+    --tinte:    #10272C;
+    --leise:    #5B7076;
+    --linie:    #DCE4E5;
 
-    --akzent:      #0E7C86;
-    --akzent-hell: #D7ECEE;
+    --akzent:   #0E6E73;
+    --akzent-d: #0A5458;
 
-    --abgelaufen:  #A82D22;
-    --bald:        #A25C06;
-    --gut:         #1E7A5A;
-    --wash-rot:    #FBEDEA;
-    --wash-gelb:   #FCF4E6;
-    --wash-gruen:  #E8F4EF;
+    --rot:        #B3261E;
+    --rot-h:      #FBECEA;
+    --bernstein:  #92540A;
+    --bernstein-h:#FBF2E4;
+    --gruen:      #1C6B4A;
+    --gruen-h:    #E8F3ED;
 
-    --schild-tief: #0D262E;
-    --schild-hell: #C9DDE0;
+    --tief: #0B2126;
 
-    --schmal: "Roboto Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
-    --lauf:   Roboto, ui-sans-serif, system-ui, sans-serif;
+    --zahl: "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+    --text: Roboto, system-ui, -apple-system, sans-serif;
   }
 
   * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--papier); }
 
   body {
-    margin: 0; background: var(--papier); color: var(--tinte);
-    font-family: var(--lauf); font-size: 15px; line-height: 1.5;
+    color: var(--tinte);
+    font-family: var(--text);
+    font-size: 16px;
+    line-height: 1.45;
     -webkit-text-size-adjust: 100%;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  .huelle { max-width: 560px; margin: 0 auto; padding: 0 16px 64px; }
 
-  /* ---------- Kopf ---------- */
+  .huelle { max-width: 600px; margin: 0 auto; padding: 0 18px 56px; }
 
-  .haus {
-    background: var(--schild-tief); color: var(--schild-hell);
-    border-top: 4px solid var(--akzent);
-    padding: 20px 16px 18px; margin-top: 16px;
-  }
-  .haus h1 {
-    font-family: var(--schmal); font-size: 27px; font-weight: 700;
-    color: #fff; margin: 0 0 2px; line-height: 1.15;
-  }
-  .haus .adresse { font-size: 13.5px; color: var(--akzent-hell); opacity: .72; }
+  /* ---------- Kopf: das Gebäude tritt zurück ---------- */
 
-  .ampel { display: flex; gap: 8px; margin-top: 16px; }
-  .ampel div {
-    flex: 1 1 0; padding: 9px 10px; text-align: center;
-    background: rgba(255,255,255,.07);
-    border-bottom: 3px solid var(--linie);
-  }
-  .ampel .zahl { font-family: var(--schmal); font-size: 24px; font-weight: 700; color: #fff; line-height: 1.1; }
-  .ampel .was  { font-family: var(--schmal); font-size: 11.5px; color: var(--akzent-hell); opacity: .8; }
-  .ampel .rot  { border-bottom-color: var(--abgelaufen); }
-  .ampel .gelb { border-bottom-color: var(--bald); }
-  .ampel .gruen{ border-bottom-color: var(--gut); }
-
-  .stichtagzeile { display: flex; gap: 8px; align-items: center; margin: 14px 0 6px; }
-  .stichtagzeile label { font-family: var(--schmal); font-size: 12.5px; color: var(--tinte-leise); }
-  input[type="date"] {
-    font: inherit; font-family: var(--schmal); color: var(--tinte);
-    background: var(--flaeche); border: 1px solid var(--linie);
-    border-bottom: 2px solid var(--akzent); padding: 7px 10px;
-  }
-  input:focus-visible { outline: 2px solid var(--akzent); outline-offset: 1px; }
-
-  /* ---------- Abschnitte ---------- */
-
-  .lage {
-    margin: 8px 0 0;
-    padding: 7px 10px;
-    background: var(--flaeche);
-    border-left: 4px solid var(--gut);
-    font-family: var(--schmal);
-    font-size: 12.5px;
-    color: var(--tinte-leise);
-  }
-  .lage.fluechtig { border-left-color: var(--bald); color: var(--bald); }
-  .knopf {
-    font-family: var(--schmal); font-size: 12.5px; font-weight: 600;
-    padding: 4px 9px; margin-left: 8px; cursor: pointer;
-    border: 1px solid var(--akzent); background: transparent; color: var(--akzent);
-  }
-  .knopf:hover { background: var(--akzent-hell); }
-  .knopf:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
-
-  .haus.bearbeiten { padding-bottom: 18px; }
-  .formularkopf {
-    font-family: var(--schmal); font-size: 20px; font-weight: 700;
-    color: #fff; margin: 0 0 12px;
-  }
-  .felder { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
-  .feld { display: block; margin-bottom: 10px; }
-  .feld.weit { grid-column: 1 / -1; }
-  .feld > span {
-    display: block; font-family: var(--schmal); font-size: 12.5px;
-    color: var(--akzent-hell); opacity: .75; margin-bottom: 3px;
-  }
-  .feld input, .feld select {
-    width: 100%; font: inherit; font-size: 14px; color: var(--tinte);
-    background: #fff; border: 1px solid var(--linie);
-    border-bottom: 2px solid var(--akzent); padding: 8px 10px;
-  }
-  .hinweiszeile { font-size: 12.5px; color: var(--akzent-hell); opacity: .75; margin: 2px 0 12px; }
-  .meldung { margin: 8px 0; font-size: 13px; padding: 6px 9px; border-left: 3px solid var(--linie); }
-  .meldung.erfolg { border-left-color: var(--gut); color: #fff; }
-  .meldung.fehler { border-left-color: var(--abgelaufen); color: #FFD9D4; }
-  .meldung.hinweis { border-left-color: var(--akzent); color: var(--akzent-hell); }
-  .knopf.voll { background: var(--akzent); color: #fff; }
-  .knopf.hell { margin: 10px 0 0; color: var(--akzent-hell); border-color: var(--akzent-hell); }
-  .knopf.hell:hover { background: rgba(255,255,255,.12); }
-
-  .block {
-    margin-top: 28px;
-    background: var(--flaeche);
-    border: 1px solid var(--linie);
-    border-left: 5px solid var(--akzent);
-  }
-  .block > summary {
+  .ort {
     display: flex; align-items: baseline; justify-content: space-between;
-    gap: 10px; padding: 12px 14px; cursor: pointer; list-style: none;
+    gap: 12px; padding: 20px 0 14px;
   }
-  .block > summary::-webkit-details-marker { display: none; }
-  .block > summary::after {
-    content: "+"; font-family: var(--schmal); font-size: 19px;
-    font-weight: 700; color: var(--akzent); line-height: 1; order: 3;
+  .ort h1 { font-size: 17px; font-weight: 500; margin: 0; letter-spacing: -0.01em; }
+  .ort button {
+    flex: 0 0 auto; font: inherit; font-size: 14px;
+    background: none; border: 0; padding: 4px 0;
+    color: var(--akzent); cursor: pointer;
   }
-  .block[open] > summary::after { content: "–"; }
-  .block > summary:focus-visible { outline: 2px solid var(--akzent); outline-offset: -2px; }
-  .block[open] > summary { border-bottom: 1px solid var(--linie-fein); }
-  .btitel { flex: 1 1 auto; font-family: var(--schmal); font-size: 16px; font-weight: 700; }
-  .babzeichen {
-    flex: 0 0 auto; font-family: var(--schmal); font-size: 12.5px;
-    color: var(--tinte-leise); white-space: nowrap;
+  .ort button:hover { color: var(--akzent-d); }
+
+  /* ---------- Held: der dringendste Punkt als Satz ---------- */
+
+  .brennpunkt {
+    background: var(--tief); color: #fff;
+    border-radius: 14px; padding: 22px 20px; margin-bottom: 10px;
   }
-  .binhalt { padding: 12px 14px 16px; }
-  .binhalt .fristen li { background: #fff; }
-
-  section { margin-top: 28px; }
-  h2 {
-    font-family: var(--schmal); font-size: 15px; font-weight: 700;
-    margin: 0 0 10px; padding-bottom: 6px;
-    color: var(--akzent); border-bottom: 2px solid var(--akzent);
+  .brennpunkt .was {
+    font-size: 25px; font-weight: 600; line-height: 1.2;
+    letter-spacing: -0.02em; margin: 0 0 8px;
   }
-  .unterzeile { font-size: 13px; color: var(--tinte-leise); margin: -4px 0 12px; }
-
-  /* ---------- Fristenliste ---------- */
-
-  .fristen { list-style: none; margin: 0; padding: 0; }
-  .fristen li {
-    display: flex; justify-content: space-between; gap: 12px;
-    background: var(--flaeche);
-    border-left: 5px solid var(--linie);
-    padding: 11px 13px; margin-bottom: 8px;
+  .brennpunkt .wo { font-size: 14.5px; color: #9FBDC0; margin: 0; }
+  .brennpunkt .seit {
+    display: inline-block; margin-top: 14px;
+    font-family: var(--zahl); font-size: 14px; font-weight: 600;
+    padding: 5px 11px; border-radius: 999px;
   }
-  .fristen li.abgelaufen { border-left-color: var(--abgelaufen); background: var(--wash-rot); }
-  .fristen li.bald, .fristen li.laeuft_heute_ab { border-left-color: var(--bald); background: var(--wash-gelb); }
-  .fristen li.ok { border-left-color: var(--gut); background: var(--wash-gruen); }
-  .fristen li.unbekannt { border-left-color: var(--tinte-leise); }
+  .brennpunkt .seit.rot  { background: #4A1511; color: #FFC8C2; }
+  .brennpunkt .seit.gelb { background: #4A3209; color: #FFDFA8; }
+  .brennpunkt.ruhe { background: var(--gruen-h); color: var(--tinte); }
+  .brennpunkt.ruhe .was { color: var(--gruen); }
+  .brennpunkt.ruhe .wo { color: var(--leise); }
 
-  .fristen .links { flex: 1 1 auto; min-width: 0; }
-  .fristen .titel { font-weight: 600; font-size: 14.5px; }
-  .fristen .zusatz { font-size: 12.5px; color: var(--tinte-leise); }
-  .fristen .rechts {
-    flex: 0 0 auto; text-align: right; white-space: nowrap;
-    font-family: var(--schmal);
+  .bilanz {
+    display: flex; gap: 20px; padding: 2px 4px 24px;
+    font-size: 14px; color: var(--leise);
   }
-  .fristen .datum { font-size: 17px; font-weight: 700; }
-  .fristen .rest { font-size: 12px; }
-  li.abgelaufen .datum, li.abgelaufen .rest { color: var(--abgelaufen); }
-  li.bald .datum, li.bald .rest { color: var(--bald); }
-  li.ok .datum { color: var(--gut); }
-  li.ok .rest { color: var(--tinte-leise); }
+  .bilanz b { font-family: var(--zahl); font-size: 16px; color: var(--tinte); }
+  .bilanz .rot b  { color: var(--rot); }
+  .bilanz .gelb b { color: var(--bernstein); }
 
-  .geraete .name a { color: inherit; text-decoration: none; border-bottom: 2px solid var(--akzent-hell); }
-  .geraete .name a:hover { border-bottom-color: var(--akzent); }
-  .fristen .zusatz a { color: var(--akzent); text-decoration: none; border-bottom: 1px solid var(--akzent-hell); }
-  .fristen .zusatz a:hover { border-bottom-color: var(--akzent); }
-  a:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+  /* ---------- Geräte: der Hauptinhalt ---------- */
 
-  .marke {
-    display: inline-block; font-family: var(--schmal); font-size: 11px;
-    padding: 1px 6px; margin-right: 6px; color: #fff; background: var(--akzent);
-    vertical-align: 1px;
+  .kopfzeile {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin: 0 0 12px;
   }
-  .marke.aufgabe { background: var(--schild-tief); }
-  .fehlermarke { color: var(--abgelaufen); font-size: 12.5px; }
+  .kopfzeile h2 { font-size: 19px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
 
-  /* ---------- Geräte ---------- */
+  .plus {
+    font: inherit; font-size: 15px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--akzent); color: #fff;
+    border: 0; border-radius: 999px;
+    padding: 9px 16px 9px 13px;
+    cursor: pointer; text-decoration: none;
+  }
+  .plus:hover { background: var(--akzent-d); }
+  .plus span { font-size: 20px; line-height: 1; margin-top: -2px; }
 
   .geraete { list-style: none; margin: 0; padding: 0; }
-  .geraete li {
-    background: var(--flaeche); border: 1px solid var(--linie);
-    border-left: 5px solid var(--akzent);
-    padding: 12px 14px; margin-bottom: 10px;
+  .geraete li { margin-bottom: 10px; }
+  .geraete a {
+    display: block; background: var(--karte);
+    border: 1px solid var(--linie); border-left: 5px solid var(--linie);
+    border-radius: 12px; padding: 15px 16px;
+    color: inherit; text-decoration: none;
   }
-  .geraete .name { font-family: var(--schmal); font-size: 18px; font-weight: 700; }
-  .geraete .ort { font-size: 12.5px; color: var(--tinte-leise); margin-bottom: 8px; }
-  .zaehler { display: flex; gap: 14px; font-family: var(--schmal); font-size: 13px; }
-  .zaehler b { font-size: 16px; }
-  .zaehler .rot { color: var(--abgelaufen); }
-  .zaehler .gelb { color: var(--bald); }
-  .zaehler .gruen { color: var(--gut); }
+  .geraete a:hover { border-color: var(--akzent); }
+  .geraete a.offen { border-left-color: var(--rot); }
+  .geraete a.bald  { border-left-color: var(--bernstein); }
+  .geraete a.ruhig { border-left-color: var(--gruen); }
+  .geraete .name {
+    font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 2px;
+  }
+  .geraete .raum { font-size: 14px; color: var(--leise); }
+  .geraete .lage {
+    margin-top: 10px; font-size: 14px;
+    display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
+  }
 
-  .kennzahl {
-    background: var(--schild-tief); color: var(--schild-hell);
-    padding: 16px; border-left: 5px solid var(--akzent);
+  .punkt {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--zahl); font-weight: 600; font-size: 13.5px;
+    padding: 3px 10px; border-radius: 999px;
   }
-  .kennzahl .gross {
-    font-family: var(--schmal); font-size: 30px; font-weight: 700;
-    color: #fff; line-height: 1.1; margin-bottom: 4px;
-  }
-  .kennzahl .zusatz { color: var(--akzent-hell); opacity: .75; font-size: 12.5px; }
+  .punkt.rot  { background: var(--rot-h); color: var(--rot); }
+  .punkt.gelb { background: var(--bernstein-h); color: var(--bernstein); }
+  .punkt.gruen{ background: var(--gruen-h); color: var(--gruen); }
+  .punkt.still{ background: var(--papier); color: var(--leise); }
 
-  .leerhinweis {
-    border: 1px dashed var(--akzent); background: var(--akzent-hell);
-    padding: 14px; font-size: 14px;
+  /* ---------- Leerer Anfang ---------- */
+
+  .anfang {
+    background: var(--karte); border: 1px solid var(--linie);
+    border-radius: 14px; padding: 30px 22px; text-align: center;
   }
-  .fussnote {
-    margin-top: 32px; padding-top: 12px;
-    border-top: 1px solid var(--linie);
-    font-size: 12.5px; color: var(--tinte-leise);
+  .anfang h2 { font-size: 21px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .anfang p { color: var(--leise); margin: 0 auto 22px; max-width: 34em; font-size: 15px; }
+  .anfang .plus { margin-bottom: 14px; }
+  .anfang .zweit {
+    display: block; margin: 0 auto; font: inherit; font-size: 14.5px;
+    background: none; border: 0; color: var(--akzent); cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
   }
+
+  /* ---------- Was ansteht ---------- */
+
+  section { margin-top: 32px; }
+
+  .anstehend { list-style: none; margin: 0; padding: 0; }
+  .anstehend li {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 14px; padding: 13px 0; border-bottom: 1px solid var(--linie);
+  }
+  .anstehend li:last-child { border-bottom: 0; }
+  .anstehend .sache { font-weight: 500; }
+  .anstehend .quelle { font-size: 13.5px; color: var(--leise); }
+  .anstehend .frist {
+    flex: 0 0 auto; text-align: right; white-space: nowrap;
+    font-family: var(--zahl); font-weight: 600; font-size: 15px;
+  }
+  .anstehend .frist small { display: block; font-weight: 400; font-size: 12.5px; }
+  .anstehend li.rot .frist  { color: var(--rot); }
+  .anstehend li.gelb .frist { color: var(--bernstein); }
+  .anstehend li.ok .frist   { color: var(--leise); }
+
+  details.mehr { margin-top: 14px; }
+  details.mehr > summary {
+    font-size: 14.5px; color: var(--akzent); cursor: pointer;
+    padding: 4px 0; list-style: none;
+  }
+  details.mehr > summary::-webkit-details-marker { display: none; }
+  details.mehr > summary::before { content: "Alles anzeigen"; }
+  details.mehr[open] > summary::before { content: "Weniger anzeigen"; }
+
+  /* ---------- Fuß ---------- */
+
+  .stichtag {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 32px; font-size: 13.5px; color: var(--leise);
+  }
+  input[type="date"] {
+    font: inherit; font-family: var(--zahl); color: var(--tinte);
+    background: var(--karte); border: 1px solid var(--linie);
+    border-radius: 8px; padding: 7px 10px;
+  }
+  input:focus-visible, button:focus-visible, a:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--akzent); outline-offset: 2px;
+  }
+
+  .lage-zeile {
+    margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--linie);
+    font-size: 13px; color: var(--leise);
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+  }
+  .lage-zeile button {
+    font: inherit; font-size: 13px; background: none; border: 0;
+    color: var(--akzent); cursor: pointer; padding: 0;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .lage-zeile .warnung { color: var(--bernstein); }
+
+  .fussnote { margin-top: 20px; font-size: 12.5px; color: var(--leise); }
+
   .fehlerkasten {
-    margin: 16px 0; border: 2px solid var(--abgelaufen);
-    padding: 14px; background: var(--flaeche);
+    margin: 20px 0; border-left: 5px solid var(--rot);
+    background: var(--rot-h); border-radius: 12px; padding: 18px;
   }
-  .fehlerkasten h2 { border: 0; color: var(--abgelaufen); }
+  .fehlerkasten h2 { margin: 0 0 6px; font-size: 18px; color: var(--rot); }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <div class="huelle" id="huelle">
   <div class="fehlerkasten" id="ladefehler" hidden>
     <h2>Module fehlen</h2>
-    <p>Diese Dateien müssen im selben Ordner liegen: <code>fristen.js</code>,
-       <code>brennstoff.js</code>, <code>objekt.js</code>, <code>demodaten.js</code>,
-       <code>speicher.js</code>, <code>sync.js</code>, <code>drive.js</code> und <code>app.js</code>.</p>
+    <p>Diese Dateien müssen im Ordner <code>js/</code> liegen: <code>fristen.js</code>,
+       <code>brennstoff.js</code>, <code>objekt.js</code>, <code>speicher.js</code>,
+       <code>sync.js</code>, <code>drive.js</code>, <code>belege.js</code>,
+       <code>demodaten.js</code> und <code>app.js</code>.</p>
   </div>
 </div>
 
@@ -255,32 +235,33 @@
      Drive-Abgleich auch im Browser. Leer = nur lokal. -->
 <script>window.HOMEIQ_CLIENT_ID = "";</script>
 <script src="js/fristen.js"></script>
+<script src="js/hersteller.js"></script>
+<script src="js/selbsthilfe.js"></script>
+<script src="js/intervalle.js"></script>
 <script src="js/brennstoff.js"></script>
 <script src="js/objekt.js"></script>
 <script src="js/speicher.js"></script>
 <script src="js/sync.js"></script>
 <script src="js/drive.js"></script>
 <script src="js/drive-web.js"></script>
+<script src="js/belege.js"></script>
 <script src="js/demodaten.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function () {
   'use strict';
 
-  if (typeof window.Fristen === 'undefined' || typeof window.Brennstoff === 'undefined' ||
-      typeof window.Objekt === 'undefined' || typeof window.Demodaten === 'undefined' ||
+  if (typeof window.Fristen === 'undefined' || typeof window.Objekt === 'undefined' ||
       typeof window.Speicher === 'undefined' || typeof window.App === 'undefined') {
     document.getElementById('ladefehler').hidden = false;
     return;
   }
-  var F = window.Fristen, BR = window.Brennstoff;
-  var OB = window.Objekt, D = window.Demodaten;
+  var F = window.Fristen, BR = window.Brennstoff, OB = window.Objekt;
 
   var objekt = null;
-  var stichtagStand = '2028-07-01';
-  var alleOffen = false;   // überlebt das Neuzeichnen
-  var bearbeiteObjekt = false;
-  var objektMeldung = null;
+  var stichtagStand = null;
+  var alleOffen = false;
+  var meldung = null;
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -294,223 +275,246 @@
     return String(t.tag).padStart(2, '0') + '.' + String(t.monat).padStart(2, '0') + '.' + t.jahr;
   }
 
-  function restText(status, restTage) {
-    if (restTage === null) return '';
-    if (status === 'abgelaufen') return 'seit ' + Math.abs(restTage) + ' Tagen';
+  function restText(status, tage) {
+    if (tage === null || tage === undefined) return '';
+    if (status === 'abgelaufen') return 'seit ' + Math.abs(tage) + ' Tagen';
     if (status === 'laeuft_heute_ab') return 'heute';
-    if (restTage < 60) return 'in ' + restTage + ' Tagen';
-    return 'in etwa ' + Math.round(restTage / 30.4) + ' Monaten';
+    if (tage < 45) return 'in ' + tage + ' Tagen';
+    return 'in ' + Math.round(tage / 30.4) + ' Monaten';
   }
 
-  function kopf(z) {
-    return '<div class="haus">' +
-      '<h1>' + esc(objekt.name) + '</h1>' +
-      '<p class="adresse">' + esc(objekt.adresse) + ' · ' +
-        esc(objekt.gebaeude.nutzung) + ', ' + objekt.gebaeude.einheiten +
-        ' Einheit' + (objekt.gebaeude.einheiten > 1 ? 'en' : '') + ' · ' +
-        objekt.geraete.length + ' Geräte</p>' +
-      '<button type="button" class="knopf hell" id="ob_bearbeiten">bearbeiten</button>' +
-      '<div class="ampel">' +
-        '<div class="rot"><div class="zahl">' + z.abgelaufen + '</div><div class="was">überfällig</div></div>' +
-        '<div class="gelb"><div class="zahl">' + z.bald + '</div><div class="was">demnächst</div></div>' +
-        '<div class="gruen"><div class="zahl">' + z.ok + '</div><div class="was">im Rahmen</div></div>' +
-        (z.unbekannt
-          ? '<div><div class="zahl">' + z.unbekannt + '</div><div class="was">unklar</div></div>'
-          : '') +
-      '</div></div>';
+  function dringend(e) {
+    return e.status === 'abgelaufen' || e.status === 'bald' || e.status === 'laeuft_heute_ab';
   }
 
-  function fristenListe(liste) {
-    if (!liste.length) return '<p class="leerhinweis">Nichts erfasst.</p>';
-    return '<ul class="fristen">' + liste.map(function (e) {
-      var rechts = e.fehler
-        ? '<span class="fehlermarke">unklar</span>'
-        : '<div class="datum">' + deDatum(e.datum) + '</div>' +
-          '<div class="rest">' + esc(restText(e.status, e.restTage)) + '</div>';
+  /* ---------- Held ----------
+     Nicht die große Zahl mit Label, sondern der Satz, für den man die
+     App überhaupt öffnet: was ist dran, bei welchem Gerät, seit wann. */
 
-      return '<li class="' + esc(e.status) + '">' +
-        '<div class="links">' +
-          '<span class="marke ' + esc(e.art) + '">' + (e.art === 'aufgabe' ? 'Wartung' : 'Anspruch') + '</span>' +
-          '<span class="titel">' + esc(e.titel) + '</span><br>' +
-          '<span class="zusatz"><a href="geraeteakte.html?g=' + encodeURIComponent(e.geraetId) + '">' +
-          esc(e.geraetName) + '</a>' +
-          (e.zusatz ? ' · ' + esc(e.zusatz) : '') +
-          (e.gegenueber ? ' · ' + esc(e.gegenueber) : '') + '</span>' +
-          (e.fehler ? '<br><span class="fehlermarke">' + esc(e.fehler) + '</span>' : '') +
-        '</div>' +
-        '<div class="rechts">' + rechts + '</div></li>';
-    }).join('') + '</ul>';
+  function brennpunkt(liste) {
+    var offen = liste.filter(dringend);
+    if (!offen.length) {
+      return '<div class="brennpunkt ruhe">' +
+        '<p class="was">Nichts offen.</p>' +
+        '<p class="wo">Keine Frist überschritten, nichts in den nächsten 30 Tagen fällig.</p>' +
+        '</div>';
+    }
+    var e = offen[0];
+    var rot = e.status === 'abgelaufen';
+    return '<div class="brennpunkt">' +
+      '<p class="was">' + esc(e.titel) + '</p>' +
+      '<p class="wo">' + esc(e.geraetName) +
+        (e.gegenueber ? ' · ' + esc(e.gegenueber) : '') + '</p>' +
+      '<span class="seit ' + (rot ? 'rot' : 'gelb') + '">' +
+        (rot ? 'überfällig ' : 'fällig ') + esc(restText(e.status, e.restTage)) + '</span>' +
+      '</div>';
   }
+
+  function bilanz(z) {
+    if (!z.gesamt) return '';
+    return '<div class="bilanz">' +
+      (z.abgelaufen ? '<span class="rot"><b>' + z.abgelaufen + '</b> überfällig</span>' : '') +
+      (z.bald ? '<span class="gelb"><b>' + z.bald + '</b> demnächst</span>' : '') +
+      '<span><b>' + z.ok + '</b> im Rahmen</span>' +
+      '</div>';
+  }
+
+  /* ---------- Geräte ---------- */
 
   function geraeteListe(liste) {
     return '<ul class="geraete">' + objekt.geraete.map(function (g) {
       var eigene = OB.fuerGeraet(liste, g.id);
       var z = OB.zusammenfassung(eigene);
-      return '<li>' +
-        '<div class="name"><a href="geraeteakte.html?g=' + encodeURIComponent(g.id) + '">' +
-        esc(g.name) + '</a></div>' +
-        '<div class="ort">' + esc(g.standort) + '</div>' +
-        '<div class="zaehler">' +
-          '<span class="rot"><b>' + z.abgelaufen + '</b> überfällig</span>' +
-          '<span class="gelb"><b>' + z.bald + '</b> demnächst</span>' +
-          '<span class="gruen"><b>' + z.ok + '</b> im Rahmen</span>' +
-        '</div></li>';
+      var klasse = z.abgelaufen ? 'offen' : (z.bald ? 'bald' : 'ruhig');
+
+      var marken = '';
+      if (z.abgelaufen) marken += '<span class="punkt rot">' + z.abgelaufen + ' überfällig</span>';
+      if (z.bald) marken += '<span class="punkt gelb">' + z.bald + ' demnächst</span>';
+      if (!z.abgelaufen && !z.bald) {
+        marken += '<span class="punkt gruen">' +
+          (z.gesamt ? 'alles im Rahmen' : 'noch nichts erfasst') + '</span>';
+      }
+      if (g.lieferungen && g.lieferungen.length && BR) {
+        var sp = BR.verbrauchSpanne(g.lieferungen, F.istGueltigesDatum, F.tageZwischen);
+        if (sp.belastbar) {
+          marken += '<span class="punkt still">' +
+            BR.mengeText(Math.round(sp.proJahrHundertstel), g.lieferungen[0].einheit) +
+            ' im Jahr</span>';
+        }
+      }
+
+      return '<li><a href="geraeteakte.html?g=' + encodeURIComponent(g.id) +
+        '" class="' + klasse + '">' +
+        '<div class="name">' + esc(g.name) + '</div>' +
+        (g.standort ? '<div class="raum">' + esc(g.standort) + '</div>' : '') +
+        '<div class="lage">' + marken + '</div>' +
+        '</a></li>';
     }).join('') + '</ul>';
   }
 
-  function brennstoffBlock() {
-    var mit = objekt.geraete.filter(function (g) { return g.lieferungen && g.lieferungen.length; });
-    if (!mit.length) return '';
-
-    return mit.map(function (g) {
-      var sp = BR.verbrauchSpanne(g.lieferungen, F.istGueltigesDatum, F.tageZwischen);
-      var einheit = g.lieferungen[0].einheit;
-      if (!sp.belastbar) {
-        return '<p class="leerhinweis">' + esc(g.name) + ': ' + esc(sp.grund) + '</p>';
-      }
-      return '<div class="kennzahl">' +
-        '<div class="gross">' + BR.mengeText(Math.round(sp.proJahrHundertstel), einheit) + '</div>' +
-        '<div class="zusatz">hochgerechnet je Jahr · ' +
-          BR.eurText(Math.round(sp.kostenProTagCent * 365)) + ' · ' + esc(g.name) + '</div>' +
-        '<div class="zusatz">Grundlage: ' + BR.mengeText(sp.mengeHundertstel, einheit) +
-          ' in ' + sp.tage + ' Tagen</div></div>';
-    }).join('');
-  }
-
-  function wertVon(id) { var e = document.getElementById(id); return e ? e.value : ''; }
-
-  function objektFormular() {
-    var g = objekt.gebaeude || { nutzung: 'privat', einheiten: 1 };
-    return '<div class="haus bearbeiten">' +
-      '<h2 class="formularkopf">Objekt bearbeiten</h2>' +
-      '<div class="felder">' +
-        '<label class="feld weit"><span>Name</span><input type="text" id="ob_name" value="' +
-          esc(objekt.name) + '"></label>' +
-        '<label class="feld weit"><span>Adresse</span><input type="text" id="ob_adresse" value="' +
-          esc(objekt.adresse || '') + '"></label>' +
-        '<label class="feld"><span>Art</span><select id="ob_typ">' +
-          [['haus','Haus'],['wohnung','Wohnung'],['garage','Garage'],['sonstiges','Sonstiges']]
-            .map(function (o) {
-              return '<option value="' + o[0] + '"' + (objekt.typ === o[0] ? ' selected' : '') +
-                '>' + o[1] + '</option>'; }).join('') +
-        '</select></label>' +
-        '<label class="feld"><span>Baujahr</span><input type="number" id="ob_baujahr" min="1500" max="2100" value="' +
-          esc(objekt.baujahr === null || objekt.baujahr === undefined ? '' : String(objekt.baujahr)) + '"></label>' +
-        '<label class="feld"><span>Nutzung</span><select id="ob_nutzung">' +
-          '<option value="privat"' + (g.nutzung === 'privat' ? ' selected' : '') + '>privat</option>' +
-          '<option value="gewerblich"' + (g.nutzung === 'gewerblich' ? ' selected' : '') + '>gewerblich</option>' +
-        '</select></label>' +
-        '<label class="feld"><span>Einheiten</span><input type="number" id="ob_einheiten" min="1" max="999" value="' +
-          esc(String(g.einheiten || 1)) + '"></label>' +
-      '</div>' +
-      '<p class="hinweiszeile">Nutzung und Anzahl der Einheiten entscheiden, welche Pflichten im Wartungskatalog erscheinen.</p>' +
-      (objektMeldung
-        ? '<p class="meldung ' + esc(objektMeldung.art) + '">' + esc(objektMeldung.text) + '</p>' : '') +
-      '<button type="button" class="knopf voll" id="ob_speichern">Speichern</button> ' +
-      '<button type="button" class="knopf" id="ob_abbrechen">Abbrechen</button>' +
+  /* Ein leerer Bildschirm ist eine Aufforderung, nicht eine Meldung. */
+  function leererAnfang() {
+    return '<div class="anfang">' +
+      '<h2>Noch kein Gerät erfasst</h2>' +
+      '<p>Leg das erste an: Waschmaschine, Heizung, Laptop. HomeIQ merkt sich, ' +
+      'bis wann die Gewährleistung läuft und wann die nächste Wartung fällig ist.</p>' +
+      '<a class="plus" href="geraeteakte.html?neu=1"><span>+</span>Gerät anlegen</a>' +
+      '<button type="button" class="zweit" id="beispiele">Erst mit Beispieldaten ansehen</button>' +
       '</div>';
   }
 
-  function objektSpeichern() {
-    var name = wertVon('ob_name');
-    var jahr = parseInt(wertVon('ob_baujahr'), 10);
-    var einheiten = parseInt(wertVon('ob_einheiten'), 10);
+  /* ---------- Was ansteht ---------- */
 
-    var fehler = [];
-    if (!String(name).trim()) fehler.push('Ohne Namen ist das Objekt nicht zu unterscheiden.');
-    if (wertVon('ob_baujahr').trim() && (!Number.isInteger(jahr) || jahr < 1500 || jahr > 2100)) {
-      fehler.push('Das Baujahr ist unplausibel.');
-    }
-    if (!Number.isInteger(einheiten) || einheiten < 1) fehler.push('Es muss mindestens eine Einheit geben.');
-    if (fehler.length) { objektMeldung = { art: 'fehler', text: fehler.join(' ') }; zeichnen(); return; }
+  function anstehend(liste) {
+    if (!liste.length) return '';
+    var offen = liste.filter(dringend);
+    var rest = liste.filter(function (e) { return !dringend(e); });
 
-    objekt.name = name;
-    objekt.adresse = wertVon('ob_adresse');
-    objekt.typ = wertVon('ob_typ');
-    objekt.baujahr = Number.isInteger(jahr) ? jahr : null;
-    objekt.gebaeude = { nutzung: wertVon('ob_nutzung'), einheiten: einheiten };
+    var zeile = function (e) {
+      var klasse = e.status === 'abgelaufen' ? 'rot' : (dringend(e) ? 'gelb' : 'ok');
+      return '<li class="' + klasse + '">' +
+        '<div><div class="sache">' + esc(e.titel) + '</div>' +
+        '<div class="quelle">' + esc(e.geraetName) + '</div></div>' +
+        '<div class="frist">' + (e.datum ? deDatum(e.datum) : 'unklar') +
+        '<small>' + esc(restText(e.status, e.restTage)) + '</small></div></li>';
+    };
 
-    bearbeiteObjekt = false;
-    objektMeldung = { art: 'erfolg', text: 'Objekt geändert.' };
-    window.App.speichern().then(zeichnen);
-    zeichnen();
+    return '<section>' +
+      '<div class="kopfzeile"><h2>' +
+        (offen.length ? 'Zu erledigen' : 'Alle Fristen') + '</h2></div>' +
+      '<ul class="anstehend">' + (offen.length ? offen : rest).map(zeile).join('') + '</ul>' +
+      (offen.length && rest.length
+        ? '<details class="mehr"' + (alleOffen ? ' open' : '') + ' id="mehr"><summary></summary>' +
+          '<ul class="anstehend">' + rest.map(zeile).join('') + '</ul></details>'
+        : '') +
+      '</section>';
   }
 
-  function lagezeile() {
+  /* ---------- Fuß ---------- */
+
+  function lageZeile() {
     var sp = window.App.zustand.speicher;
+    var sy = window.App.zustand.sync;
     var dauerhaft = sp ? sp.zustand().dauerhaft : false;
-    return '<p class="lage' + (dauerhaft ? '' : ' fluechtig') + '">' +
-      esc(window.App.lageText()) +
-      ' <button type="button" class="knopf zart" id="zuruecksetzen">Demodaten zurücksetzen</button></p>';
+    var an = sy ? sy.istAktiv() : false;
+    var verbunden = sy && sy.zustand().drive !== 'aus';
+
+    return '<div class="lage-zeile">' +
+      '<span' + (dauerhaft ? '' : ' class="warnung"') + '>' +
+        esc(window.App.lageText()) + '</span>' +
+      (verbunden
+        ? '<button type="button" id="abgleich">Abgleich ' +
+          (an ? 'abschalten' : 'einschalten') + '</button>'
+        : '') +
+      (objekt.geraete.length ? '<button type="button" id="leeren">Alles löschen</button>' : '') +
+      '</div>';
   }
+
+  /* ---------- Aufbau ---------- */
 
   function zeichnen() {
     var feld = document.getElementById('stichtag');
     if (feld && F.istGueltigesDatum(feld.value)) stichtagStand = feld.value;
+    if (!stichtagStand) stichtagStand = F.heute();
 
     var liste = OB.alleFristen(objekt, stichtagStand, F);
     var z = OB.zusammenfassung(liste);
-    var dringend = liste.filter(function (e) {
-      return e.status === 'abgelaufen' || e.status === 'bald' ||
-             e.status === 'laeuft_heute_ab' || e.status === 'unbekannt';
-    });
+    var leer = !objekt.geraete.length;
 
     var html =
-      (bearbeiteObjekt ? objektFormular() : kopf(z)) +
-      lagezeile() +
-      '<div class="stichtagzeile"><label for="stichtag">Stichtag</label>' +
-      '<input type="date" id="stichtag" value="' + esc(stichtagStand) + '"></div>' +
+      '<div class="ort"><h1>' + esc(objekt.name || 'Mein Zuhause') + '</h1>' +
+      '<button type="button" id="ortBearbeiten">Umbenennen</button></div>' +
 
-      '<section><h2>Handlungsbedarf</h2>' +
-        (dringend.length
-          ? '<p class="unterzeile">Nach Dringlichkeit, über alle Geräte hinweg.</p>' + fristenListe(dringend)
-          : '<p class="leerhinweis">Nichts überfällig und nichts in den nächsten 30 Tagen.</p>') +
-      '</section>' +
+      (leer ? '' : brennpunkt(liste) + bilanz(z)) +
+      (meldung ? '<p class="fussnote">' + esc(meldung) + '</p>' : '') +
 
-      brennstoffBlock() +
+      (leer
+        ? leererAnfang()
+        : '<section style="margin-top:4px">' +
+            '<div class="kopfzeile"><h2>Geräte</h2>' +
+            '<a class="plus" href="geraeteakte.html?neu=1"><span>+</span>Gerät</a></div>' +
+            geraeteListe(liste) +
+          '</section>' + anstehend(liste)) +
 
-      '<section><h2>Geräte</h2>' + geraeteListe(liste) + '</section>' +
+      (leer ? ''
+        : '<div class="stichtag"><label for="stichtag">Stichtag</label>' +
+          '<input type="date" id="stichtag" value="' + esc(stichtagStand) + '"></div>') +
 
-      '<details class="block"' + (alleOffen ? ' open' : '') + ' id="alles">' +
-        '<summary><span class="btitel">Alles mit Frist</span>' +
-        '<span class="babzeichen">' + liste.length + ' Einträge</span></summary>' +
-        '<div class="binhalt">' + fristenListe(liste) + '</div></details>' +
-
-      '<p class="fussnote">Alle Fristen sind Orientierungswerte und ersetzen keine Rechtsberatung. ' +
+      lageZeile() +
+      '<p class="fussnote">Fristen sind Orientierungswerte und ersetzen keine Rechtsberatung. ' +
       'Maßgeblich sind die Belege und die vertraglichen Vereinbarungen.</p>';
 
     var huelle = document.getElementById('huelle');
     huelle.innerHTML = html;
-    var neu = document.getElementById('stichtag');
-    if (neu) neu.addEventListener('change', zeichnen);
-    var alles = document.getElementById('alles');
-    if (alles) alles.addEventListener('toggle', function () { alleOffen = alles.open; });
-    var obB = document.getElementById('ob_bearbeiten');
-    if (obB) obB.addEventListener('click', function () {
-      bearbeiteObjekt = true; objektMeldung = null; zeichnen();
+    verdrahten();
+  }
+
+  function verdrahten() {
+    var st = document.getElementById('stichtag');
+    if (st) st.addEventListener('change', zeichnen);
+
+    var mehr = document.getElementById('mehr');
+    if (mehr) mehr.addEventListener('toggle', function () { alleOffen = mehr.open; });
+
+    var bsp = document.getElementById('beispiele');
+    if (bsp) bsp.addEventListener('click', function () {
+      bsp.disabled = true;
+      window.App.demodatenLaden().then(function (r) {
+        if (r.erfolg) { objekt = r.objekt; meldung = null; }
+        else { meldung = r.fehler; }
+        zeichnen();
+      });
     });
-    var obS = document.getElementById('ob_speichern');
-    if (obS) obS.addEventListener('click', objektSpeichern);
-    var obA = document.getElementById('ob_abbrechen');
-    if (obA) obA.addEventListener('click', function () {
-      bearbeiteObjekt = false;
-      objektMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
+
+    /* Zwei Klicks, kein Browser-Dialog: der erste fragt, der zweite löscht. */
+    var leeren = document.getElementById('leeren');
+    if (leeren) leeren.addEventListener('click', function () {
+      if (leeren.getAttribute('data-sicher') !== '1') {
+        leeren.setAttribute('data-sicher', '1');
+        leeren.textContent = 'Wirklich alles löschen?';
+        return;
+      }
+      window.App.zuruecksetzen().then(function () { window.location.reload(); });
+    });
+
+    var ob = document.getElementById('ortBearbeiten');
+    if (ob) ob.addEventListener('click', function () {
+      var name = window.prompt('Wie heißt dieses Zuhause?', objekt.name || '');
+      if (name === null) return;
+      objekt.name = String(name).trim() || 'Mein Zuhause';
+      window.App.speichern();
       zeichnen();
     });
-    var zur = document.getElementById('zuruecksetzen');
-    if (zur) zur.addEventListener('click', function () {
-      window.App.zuruecksetzen().then(function () { window.location.reload(); });
+
+    var abg = document.getElementById('abgleich');
+    if (abg) abg.addEventListener('click', function () {
+      var sy = window.App.zustand.sync;
+      if (sy.istAktiv()) {
+        meldung = sy.warnungAbschalten();
+        sy.abschalten().then(zeichnen);
+      } else {
+        sy.einschalten().then(function (r) {
+          meldung = r.fehler ? r.fehler
+            : (r.entscheidungNoetig
+              ? 'Beide Seiten haben sich geändert. Die Auswahl triffst du in der Geräteakte.'
+              : 'Abgleich eingeschaltet. ' + (r.begruendung || ''));
+          zeichnen();
+        });
+      }
+      zeichnen();
     });
   }
 
   function starten() {
-    window.App.starten().then(function (z) {
-      if (!z.objekt) {
+    window.App.starten().then(function (zu) {
+      if (!zu.objekt) {
         document.getElementById('huelle').innerHTML =
-          '<div class="fehlerkasten"><h2>Keine Daten</h2><p>Es konnte kein Datenstand geladen werden.</p></div>';
+          '<div class="fehlerkasten"><h2>Kein Datenstand</h2>' +
+          '<p>Es konnte nichts geladen werden. Lade die Seite neu.</p></div>';
         return;
       }
-      objekt = z.objekt;
+      objekt = zu.objekt;
+      if (!Array.isArray(objekt.geraete)) objekt.geraete = [];
       zeichnen();
     }).catch(function (e) {
       document.getElementById('huelle').innerHTML =
