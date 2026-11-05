@@ -4,6 +4,17 @@
    die Einstellung einen Neustart überlebt. */
 const fs = require('fs');
 const P = require('path').join(__dirname, '..', 'public') + '/';
+/* Die App startet jetzt leer. Für diese Prüfungen wird der
+   Beispielbestand vorher in den Speicher gelegt. */
+function beispieleEinlegen(lager) {
+  const D = require(P + 'js/demodaten.js');
+  const objekt = JSON.parse(JSON.stringify(D.OBJEKT));
+  objekt.schemaVersion = 1;
+  objekt.gespeichert = new Date().toISOString();
+  lager['homeiq:objekt'] = JSON.stringify(objekt);
+  return lager;
+}
+
 function bau(lager) {
   const knoten = [];
   function mach(id){ let k=knoten.find(x=>x._id===id);
@@ -33,7 +44,7 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
   else {fehler++; console.log('FEHLER: '+n+'\n  ist:  '+JSON.stringify(i)+'\n  soll: '+JSON.stringify(s));} };
 
 (async()=>{
-  const lager={};
+  const lager=beispieleEinlegen({});
   const a=bau(lager);
   await new Promise(r=>setTimeout(r,60));
   const voll=a.mach('huelle').innerHTML;
