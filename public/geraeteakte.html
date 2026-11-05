@@ -2729,16 +2729,24 @@
       vorlagenMeldung = null; sichern();
     });
 
+    /* Suche und Stichtag gibt es nur in der vollen Ansicht. In der
+       einfachen Ansicht und im Geräteformular fehlen sie, und ein
+       ungeprüfter Zugriff bricht den ganzen Aufbau ab. */
     var s = document.getElementById('suche');
-    s.addEventListener('input', function () {
-      var pos = this.selectionStart, wert = this.value;
-      zeichnen();
-      var neu = document.getElementById('suche');
-      neu.focus();
-      neu.value = wert;
-      try { neu.setSelectionRange(pos, pos); } catch (e) {}
-    });
-    document.getElementById('stichtag').addEventListener('change', zeichnen);
+    if (s) {
+      s.addEventListener('input', function () {
+        var pos = this.selectionStart, wert = this.value;
+        zeichnen();
+        var neu = document.getElementById('suche');
+        if (!neu) return;
+        neu.focus();
+        neu.value = wert;
+        try { neu.setSelectionRange(pos, pos); } catch (e) {}
+      });
+    }
+
+    var stich = document.getElementById('stichtag');
+    if (stich) stich.addEventListener('change', zeichnen);
   }
 
   /* Hinweisblasen: einmalig delegiert, damit Neuaufbauten nichts doppeln.
