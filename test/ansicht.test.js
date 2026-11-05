@@ -17,11 +17,20 @@ function beispieleEinlegen(lager) {
 
 function bau(lager) {
   const knoten = [];
-  function mach(id){ let k=knoten.find(x=>x._id===id);
+  /* Nur was im gezeichneten HTML steht, gibt es auch. Sonst null,
+     genau wie im Browser. */
+  const statisch = ['huelle', 'ladefehler'];
+  function mach(id){
+    const huelle = knoten.find(x=>x._id==='huelle');
+    const vorhanden = statisch.indexOf(id) !== -1 ||
+      (huelle && huelle.innerHTML.indexOf('id="'+id+'"') !== -1);
+    if (!vorhanden) return null;
+    let k=knoten.find(x=>x._id===id);
     if(!k){k={_id:id,innerHTML:'',textContent:'',value:'',checked:false,hidden:false,style:{},open:false,
       className:'',addEventListener(){},setAttribute(){},getAttribute(){return null;},
       querySelectorAll(){return [];},querySelector(){return null;},focus(){},closest(){return null;},
-      setSelectionRange(){},selectionStart:0}; knoten.push(k);} return k; }
+      setSelectionRange(){},selectionStart:0}; knoten.push(k);}
+    return k; }
   const win={localStorage:{getItem:k=>k in lager?lager[k]:null,setItem:(k,v)=>{lager[k]=String(v);},removeItem:k=>{delete lager[k];}},
     location:{search:'',reload(){}},setTimeout,clearTimeout};
   win.document={readyState:'complete',getElementById:mach,querySelectorAll:()=>[],querySelector:()=>null,addEventListener(){}};
