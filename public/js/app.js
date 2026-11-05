@@ -81,8 +81,19 @@
       zusammenfuehren: window.Speicher.zusammenfuehren
     });
 
-    var vorgabe = (window.Demodaten && window.Demodaten.OBJEKT)
-      ? tiefeKopie(window.Demodaten.OBJEKT) : null;
+    /* Ein leeres Zuhause, kein Beispielbestand. Wer die App öffnet,
+       soll seine eigenen Geräte anlegen – Demodaten gibt es auf
+       Knopfdruck, nicht ungefragt. */
+    var vorgabe = {
+      id: 'obj_' + Date.now(),
+      name: 'Mein Zuhause',
+      typ: 'haus',
+      adresse: '',
+      baujahr: null,
+      gebaeude: { nutzung: 'privat', einheiten: 1 },
+      geaendert: new Date().toISOString(),
+      geraete: []
+    };
 
     /* Der Belegspeicher wird nebenher geöffnet. Scheitert er, läuft
        die App trotzdem – dann eben ohne dauerhafte Dateien. */
@@ -137,7 +148,17 @@
     });
   }
 
-  /** Setzt auf die Demodaten zurück. Für Tests unentbehrlich. */
+  /** Lädt den Beispielbestand. Ersetzt den bisherigen Stand. */
+  function demodatenLaden() {
+    if (!window.Demodaten || !window.Demodaten.OBJEKT) {
+      return Promise.resolve({ erfolg: false, fehler: 'Keine Beispieldaten vorhanden.' });
+    }
+    zustand.objekt = tiefeKopie(window.Demodaten.OBJEKT);
+    zustand.objekt.geaendert = new Date().toISOString();
+    return speichern().then(function () { return { erfolg: true, objekt: zustand.objekt }; });
+  }
+
+  /** Leert alles und beginnt von vorn. */
   function zuruecksetzen() {
     if (!zustand.speicher) return Promise.resolve();
     return zustand.speicher.loeschen(NAME)
@@ -171,7 +192,7 @@
     if (zustand.belege && !zustand.belege.zustand().dauerhaft) {
       teile.push('Belege nur im Arbeitsspeicher');
     }
-    if (zustand.ersteinrichtung) teile.push('Demodaten angelegt');
+
     if (zustand.defekt) teile.push('gespeicherte Daten waren beschädigt');
 
     return teile.join(' · ');
@@ -179,6 +200,7 @@
 
   window.App = {
     starten: starten,
+    demodatenLaden: demodatenLaden,
     einstellungLesen: einstellungLesen,
     einstellungSetzen: einstellungSetzen,
     speichern: speichern,
