@@ -1084,7 +1084,12 @@
     geraet = geraete[aktivIdx];
     bearbeiteGeraet = null;
     geraetMeldung = { art: 'erfolg', text: neu ? 'Gerät angelegt.' : 'Gerät geändert.' };
-    sichern();
+    var erstes = neu && geraete.length === 1;
+    sichern().then(function () {
+      /* Beim allerersten Gerät zurück zur Übersicht – dort sieht man,
+         dass tatsächlich etwas entstanden ist. */
+      if (erstes) window.location.href = 'index.html';
+    });
   }
 
   /** Was hängt an einem Gerät? Für die Rückfrage vor dem Löschen. */
@@ -2470,6 +2475,7 @@
   }
 
   function geraetKnoepfe() {
+    if (!geraet) return '';
     var inhalt = geraetInhalt(geraet);
     var gefragt = loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id;
     return '<div class="geraetknoepfe">' +
@@ -2488,10 +2494,10 @@
   function geraeteWahl() {
     return '<p class="zurueck"><a href="index.html">Zur Übersicht ' +
       esc(objekt.name) + '</a></p>' +
-      '<div class="wahl">' + geraete.map(function (g, i) {
+      (geraete.length < 2 ? '' : '<div class="wahl">' + geraete.map(function (g, i) {
       return '<button type="button" class="reiter' + (i === aktivIdx ? ' aktiv' : '') +
              '" data-geraet="' + i + '">' + esc(g.name) + '</button>';
-    }).join('') + '</div>';
+    }).join('') + '</div>');
   }
 
   function fussnote() {
@@ -2507,7 +2513,15 @@
 
   function zeichnen() {
     hinweisZaehler = 0;
-    geraet = geraete[aktivIdx];
+    geraet = geraete[aktivIdx] || null;
+
+    /* Ohne Gerät gibt es nichts anzuzeigen außer dem Formular. */
+    if (!geraet && bearbeiteGeraet !== 'neu') bearbeiteGeraet = 'neu';
+    if (!geraet) {
+      zeichneHtml(geraeteWahl() +
+        geraetFormular(leeresGeraet()) + fussnote());
+      return;
+    }
     var sucheFeld = document.getElementById('suche');
     var stichtagFeld = document.getElementById('stichtag');
     var suche = sucheFeld ? sucheFeld.value : '';
@@ -2861,7 +2875,9 @@
     }
     if (e.target.closest('[data-ge-speichern]')) { alleSchliessen(null); geraetSpeichern(); return; }
     if (e.target.closest('[data-ge-abbrechen]')) {
-      alleSchliessen(null); bearbeiteGeraet = null;
+      alleSchliessen(null);
+      if (!geraete.length) { window.location.href = 'index.html'; return; }
+      bearbeiteGeraet = null;
       geraetMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts geändert.' };
       zeichnen(); return;
     }
@@ -2959,7 +2975,13 @@
       geraete = objekt.geraete || [];
       objektKontext = objekt.gebaeude || objektKontext;
       aktivIdx = startIndex();
-      geraet = geraete[aktivIdx];
+      geraet = geraete[aktivIdx] || null;
+
+      /* Von der Übersicht mit ?neu=1 gekommen, oder es gibt noch gar
+         kein Gerät: direkt das Formular zeigen statt einer leeren Akte. */
+      if (/[?&]neu=1/.test(window.location.search || '') || !geraet) {
+        bearbeiteGeraet = 'neu';
+      }
       return window.App.einstellungLesen('ansicht', 'alles').then(function (a) {
         ansicht = (a === 'einfach') ? 'einfach' : 'alles';
         zeichnen();
