@@ -106,10 +106,14 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
   p('einfach: Beleg loeschbar', /data-loeschen-frage="beleg"/.test(einfach), true);
   p('einfach: keine Knopfreihe mehr', /data-ge-bearbeiten=/.test(einfach), false);
   p('einfach: Löschen in der Kopfzeile', /class="wegknopf"/.test(einfach), true);
-  p('einfach: Handbuchabschnitt', />Handbuch<\/h2>/.test(einfach), true);
-  p('einfach: Herstellerverweis verlinkt', /Anleitung beim Hersteller/.test(einfach), true);
+  /* Handbuch steht als Zeile im Typenschild, in beiden Ansichten */
+  p('einfach: Handbuchzeile', />Handbuch<\/dt>/.test(einfach), true);
+  p('voll: Handbuchzeile', />Handbuch<\/dt>/.test(voll), true);
   p('einfach: Handbuch hochladbar', /data-beleg-neu="handbuch"/.test(einfach), true);
+  p('voll: Handbuch hochladbar', /data-beleg-neu="handbuch"/.test(voll), true);
   p('einfach: Rechnungen getrennt', /data-beleg-neu="rechnung"/.test(einfach), true);
+  p('einfach: Nummer klar benannt', /Serien- oder Typennummer/.test(einfach), true);
+  p('kein Alles-löschen in der Akte', /data-zuruecksetzen/.test(voll), false);
   p('voll: Löschen in der Kopfzeile', /class="wegknopf"/.test(voll), true);
   p('voll: Kopfzeile vorhanden', /class="schildkopf"/.test(voll), true);
   p('Löschen nicht sofort scharf', /data-loeschen-ja/.test(voll), false);
