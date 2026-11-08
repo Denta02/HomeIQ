@@ -105,6 +105,10 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
 
   p('einfach: Beleg loeschbar', /data-loeschen-frage="beleg"/.test(einfach), true);
   p('einfach: keine Knopfreihe mehr', /data-ge-bearbeiten=/.test(einfach), false);
+  p('einfach: Löschen in der Kopfzeile', /class="wegknopf"/.test(einfach), true);
+  p('voll: Löschen in der Kopfzeile', /class="wegknopf"/.test(voll), true);
+  p('voll: Kopfzeile vorhanden', /class="schildkopf"/.test(voll), true);
+  p('Löschen nicht sofort scharf', /data-loeschen-ja/.test(voll), false);
 
   /* Auswahl des gezeigten Anspruchs: ganzes Gerät schlägt Bauteil,
      danach entscheidet die längste Laufzeit. */
