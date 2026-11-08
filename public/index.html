@@ -156,6 +156,15 @@
   .punkt.gruen{ background: var(--gruen-h); color: var(--gruen); }
   .punkt.still{ background: var(--papier); color: var(--leise); }
 
+  .listenfuss { margin-top: 4px; text-align: right; }
+  .listenfuss.frage-offen {
+    text-align: left; padding: 14px 16px; border-radius: 12px;
+    background: var(--rot-h); border-left: 5px solid var(--rot);
+  }
+  .listenfuss .frage {
+    margin: 0 0 12px; font-size: 14px; color: var(--rot); line-height: 1.5;
+  }
+
   /* ---------- Leerer Anfang ---------- */
 
   .anfang {
@@ -276,6 +285,7 @@
   var alleOffen = false;
   var meldung = null;
   var loeschFrage = null;   // id des Geräts, bei dem nachgefragt wird
+  var alleFrage = false;    // Rückfrage vor dem Löschen aller Geräte
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -389,7 +399,25 @@
               '<button type="button" class="wegklein" data-loeschen-nein="1">Abbrechen</button>'
             : '<button type="button" class="wegklein" data-loeschen="' + esc(g.id) + '">löschen</button>') +
         '</div></li>';
-    }).join('') + '</ul>';
+    }).join('') + '</ul>' + alleLoeschen();
+  }
+
+  /* Steht unter der Liste, nicht neben dem Plus: eine zerstörende
+     Aktion gehört nicht in Reichweite der häufigsten. */
+  function alleLoeschen() {
+    var zahl = objekt.geraete.length;
+    if (!zahl) return '';
+
+    if (!alleFrage) {
+      return '<div class="listenfuss">' +
+        '<button type="button" class="wegklein" id="alleFrage">Alle Geräte löschen</button></div>';
+    }
+    return '<div class="listenfuss frage-offen">' +
+      '<p class="frage">Wirklich alle ' + zahl + ' Geräte löschen? ' +
+      'Damit verschwinden auch alle Fristen, Wartungen und Belege dazu. ' +
+      'Das lässt sich nicht rückgängig machen.</p>' +
+      '<button type="button" class="wegklein ja" id="alleJa">Ja, alle ' + zahl + ' löschen</button> ' +
+      '<button type="button" class="wegklein" id="alleNein">Abbrechen</button></div>';
   }
 
   /* Ein leerer Bildschirm ist eine Aufforderung, nicht eine Meldung. */
@@ -445,7 +473,6 @@
         ? '<button type="button" id="abgleich">Abgleich ' +
           (an ? 'abschalten' : 'einschalten') + '</button>'
         : '') +
-      (objekt.geraete.length ? '<button type="button" id="leeren">Alles löschen</button>' : '') +
       '</div>';
   }
 
@@ -515,15 +542,21 @@
     var mehr = document.getElementById('mehr');
     if (mehr) mehr.addEventListener('toggle', function () { alleOffen = mehr.open; });
 
-    /* Zwei Klicks, kein Browser-Dialog: der erste fragt, der zweite löscht. */
-    var leeren = document.getElementById('leeren');
-    if (leeren) leeren.addEventListener('click', function () {
-      if (leeren.getAttribute('data-sicher') !== '1') {
-        leeren.setAttribute('data-sicher', '1');
-        leeren.textContent = 'Wirklich alles löschen?';
-        return;
-      }
-      window.App.zuruecksetzen().then(function () { window.location.reload(); });
+    var af = document.getElementById('alleFrage');
+    if (af) af.addEventListener('click', function () { alleFrage = true; zeichnen(); });
+    var an = document.getElementById('alleNein');
+    if (an) an.addEventListener('click', function () { alleFrage = false; zeichnen(); });
+    var aj = document.getElementById('alleJa');
+    if (aj) aj.addEventListener('click', function () {
+      var zahl = objekt.geraete.length;
+      /* Nur die Geräte, nicht das Zuhause selbst – Name und
+         Gebäudeangaben bleiben erhalten. */
+      objekt.geraete = [];
+      alleFrage = false;
+      loeschFrage = null;
+      meldung = zahl + ' Geräte gelöscht.';
+      window.App.speichern();
+      zeichnen();
     });
 
     var ob = document.getElementById('ortBearbeiten');
