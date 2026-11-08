@@ -1200,14 +1200,19 @@
       if (n.beschriftung) beschriftungNach[n.art] = n.beschriftung;
     });
 
-    function paar(label, wert, weit) {
-      var leer = !wert || !String(wert).trim();
+    /* Jeder Wert ist anklickbar, genau wie in der einfachen Ansicht.
+       Ein eigener Bearbeiten-Modus wäre ein zweiter Weg zum selben
+       Ziel – und zwei Wege laufen irgendwann auseinander. */
+    function paar(label, schluessel, anzeige, weit) {
       return '<div class="paar' + (weit ? ' weit' : '') + '">' +
              '<dt>' + esc(label) + '</dt>' +
-             '<dd class="' + (leer ? 'leer' : '') + '">' + esc(leer ? 'nicht erfasst' : wert) + '</dd></div>';
+             '<dd>' + direkt(schluessel, anzeige) + '</dd></div>';
     }
 
-    var zeilen = paar('Hersteller', i.hersteller) + paar('Modell', i.modell);
+    var zeilen = paar('Hersteller', 'hersteller', i.hersteller) +
+                 paar('Modell', 'modell', i.modell) +
+                 paar('Kategorie', 'kategorie', INLINE.kategorie.anzeige()) +
+                 paar('Status', 'status', INLINE.status.anzeige());
 
     /* Zuerst die Nummern in der Reihenfolge des Herstellerschemas … */
     schema.nummern.forEach(function (feld) {
@@ -1215,7 +1220,7 @@
       if (feld.art === 'modell') return;       // steht schon als eigene Zeile
       var wert = wertNach[feld.art];
       if (!wert && !feld.pflicht) return;      // Optionales ohne Wert nicht zeigen
-      zeilen += paar(feld.label, wert, String(wert || '').length > 14);
+      zeilen += paar(feld.label, 'nummer:' + feld.art, wert, String(wert || '').length > 14);
     });
 
     /* … danach alles, was das Schema nicht kennt. */
@@ -1223,11 +1228,18 @@
       if (!n || !n.wert) return;
       var imSchema = schema.nummern.some(function (f) { return f.art === n.art; });
       if (imSchema) return;
-      zeilen += paar(n.beschriftung || HS.labelFuer(i.hersteller, n.art), n.wert, true);
+      zeilen += paar(n.beschriftung || HS.labelFuer(i.hersteller, n.art),
+                     'nummer:' + n.art, n.wert, true);
     });
 
-    zeilen += paar('Gekauft am', deDatum(geraet.kauf.datum)) +
-              paar('Verkäufer', geraet.kauf.verkaeufer, true);
+    zeilen += paar('Gekauft als', 'kaufart', INLINE.kaufart.anzeige()) +
+              paar('Gekauft am', 'kaufdatum',
+                   F.istGueltigesDatum(geraet.kauf.datum) ? deDatum(geraet.kauf.datum) : '') +
+              paar('Verkäufer', 'verkaeufer', geraet.kauf.verkaeufer, true) +
+              paar('Preis', 'preis', geraet.kauf.preisCent
+                   ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' €' : '') +
+              paar('Handbuch', 'handbuch', (geraet.handbuch && geraet.handbuch.url) || '', true) +
+              paar('Notiz', 'notiz', geraet.notiz, true);
 
     var hinweise = HS.pruefeNummern(i.hersteller, nummern)
       .filter(function (h) { return h.schwere !== 'unpassend'; })
@@ -1235,9 +1247,12 @@
       .join('');
 
     return '<div class="schild">' +
-      '<h1>' + esc(geraet.name) + '</h1>' +
-      '<p class="ort">' + esc(geraet.standort) + '</p>' +
+      '<h1>' + direkt('name', geraet.name) + '</h1>' +
+      '<p class="ort">' + direkt('standort', geraet.standort) + '</p>' +
       '<dl class="paare">' + zeilen + '</dl>' +
+      (inlineMeldung
+        ? '<p class="meldung ' + esc(inlineMeldung.art) + '">' + esc(inlineMeldung.text) + '</p>'
+        : '<p class="tipphinweis">Auf einen Wert tippen, um ihn zu ändern.</p>') +
       (hinweise ? '<ul class="schildhinweise">' + hinweise + '</ul>' : '') +
       '</div>';
   }
@@ -2477,6 +2492,51 @@
         geraet.kauf.datum = w;
       }
     },
+    kategorie: {
+      label: 'Kategorie', typ: 'wahl', wahl: function () { return KATEGORIEN; },
+      lesen: function () { return geraet.kategorie; },
+      anzeige: function () {
+        var t = KATEGORIEN.filter(function (k) { return k[0] === geraet.kategorie; })[0];
+        return t ? t[1] : geraet.kategorie;
+      },
+      schreiben: function (w) { geraet.kategorie = w; }
+    },
+    status: {
+      label: 'Status', typ: 'wahl',
+      wahl: function () {
+        return [['aktiv', 'in Benutzung'], ['in_reparatur', 'in Reparatur'],
+                ['ausgemustert', 'ausgemustert'], ['ersetzt', 'ersetzt']];
+      },
+      lesen: function () { return geraet.status || 'aktiv'; },
+      anzeige: function () {
+        var t = INLINE.status.wahl().filter(function (k) { return k[0] === (geraet.status || 'aktiv'); })[0];
+        return t ? t[1] : geraet.status;
+      },
+      schreiben: function (w) { geraet.status = w; }
+    },
+    kaufart: {
+      label: 'Gekauft als', typ: 'wahl',
+      wahl: function () {
+        return [['neu', 'neu'], ['gebraucht_haendler', 'gebraucht, vom Händler'],
+                ['gebraucht_privat', 'gebraucht, von privat']];
+      },
+      lesen: function () { return (geraet.kauf && geraet.kauf.art) || 'neu'; },
+      anzeige: function () { return F.kaufartVorschlag(INLINE.kaufart.lesen()).text; },
+      schreiben: function (w) { geraet.kauf.art = w; }
+    },
+    notiz: {
+      label: 'Notiz', typ: 'text',
+      lesen: function () { return geraet.notiz; },
+      schreiben: function (w) { geraet.notiz = String(w).trim(); }
+    },
+    handbuch: {
+      label: 'Handbuch', typ: 'text',
+      lesen: function () { return (geraet.handbuch && geraet.handbuch.url) || ''; },
+      schreiben: function (w) {
+        if (!geraet.handbuch) geraet.handbuch = { url: '', quelle: '', dokumentId: null };
+        geraet.handbuch.url = String(w).trim();
+      }
+    },
     preis: {
       label: 'Preis', typ: 'geld',
       lesen: function () {
@@ -2492,13 +2552,47 @@
     }
   };
 
+  /* Nummern vom Typenschild sind nicht fest, sondern hängen am
+     Herstellerschema. Deshalb werden sie bei Bedarf erzeugt statt
+     in der Tabelle oben aufgezählt. */
+  function inlineFuer(schluessel) {
+    if (INLINE[schluessel]) return INLINE[schluessel];
+    if (schluessel.indexOf('nummer:') !== 0) return null;
+
+    var art = schluessel.slice(7);
+    return {
+      label: HS.labelFuer(geraet.identitaet.hersteller, art),
+      typ: 'text',
+      lesen: function () {
+        var n = nummernAusGeraet(geraet).filter(function (x) { return x && x.art === art; })[0];
+        return n ? n.wert : '';
+      },
+      schreiben: function (w) {
+        var wert = String(w).trim();
+        var liste = nummernAusGeraet(geraet);
+        var da = liste.filter(function (x) { return x && x.art === art; })[0];
+        if (da) { da.wert = wert; }
+        else if (wert) { liste.push({ art: art, wert: wert }); }
+        geraet.identitaet.nummern = liste.filter(function (x) { return x && x.wert; });
+      }
+    };
+  }
+
   /** Wert als anklickbarer Text oder, wenn gerade dran, als Eingabe. */
   function direkt(schluessel, anzeige) {
-    var f = INLINE[schluessel];
+    var f = inlineFuer(schluessel);
     if (!f) return esc(anzeige || '');
 
     if (inlineFeld === schluessel) {
       var roh = f.lesen() || '';
+      if (f.typ === 'wahl') {
+        return '<select class="direkt-feld" id="direkt_' + esc(schluessel) + '" ' +
+          'aria-label="' + esc(f.label) + '">' +
+          f.wahl().map(function (o) {
+            return '<option value="' + esc(o[0]) + '"' + (roh === o[0] ? ' selected' : '') + '>' +
+              esc(o[1]) + '</option>';
+          }).join('') + '</select>';
+      }
       var typ = f.typ === 'datum' ? 'date' : 'text';
       return '<input class="direkt-feld" type="' + typ + '" id="direkt_' + esc(schluessel) + '" ' +
         'value="' + esc(roh) + '" aria-label="' + esc(f.label) + '">';
@@ -2512,7 +2606,7 @@
 
   function direktSpeichern() {
     if (!inlineFeld) return;
-    var f = INLINE[inlineFeld];
+    var f = inlineFuer(inlineFeld);
     var feld = document.getElementById('direkt_' + inlineFeld);
     if (!f || !feld) { inlineFeld = null; zeichnen(); return; }
 
@@ -2645,22 +2739,6 @@
 
       '<section><h2>Rechnungen</h2>' + belegListe + '</section>' +
 
-      '<section><h2>Gerät</h2>' +
-        '<div class="geraetknoepfe">' +
-          '<button type="button" class="knopf zart" data-ge-bearbeiten="' + esc(geraet.id) +
-            '">Alle Angaben bearbeiten</button> ' +
-          (geraete.length > 1 ? loeschKnoepfe('geraet', geraet.id) : '') +
-          ((loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id &&
-            geraetInhalt(geraet).length)
-            ? '<div class="warnung">Mit dem Gerät verschwinden: ' +
-              esc(geraetInhalt(geraet).join(', ')) + '.</div>'
-            : '') +
-          (geraetMeldung
-            ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
-            : '') +
-        '</div>' +
-      '</section>' +
-
       '<p class="umschalthinweis">Fristen, Wartung und Störungen sind ausgeblendet. ' +
       'Über <b>Alles</b> oben werden sie wieder sichtbar.</p>';
   }
@@ -2712,23 +2790,6 @@
           (abgleichFrage.empfehlung === 'fern' ? 'Drive' : 'dieses Gerät') + '.</p>'
         : '') +
       '<button type="button" class="knopf zart" data-wahl-abbrechen="1">Abbrechen, aus lassen</button>' +
-      '</div>';
-  }
-
-  function geraetKnoepfe() {
-    if (!geraet) return '';
-    var inhalt = geraetInhalt(geraet);
-    var gefragt = loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id;
-    return '<div class="geraetknoepfe">' +
-      '<button type="button" class="knopf zart" data-ge-bearbeiten="' + esc(geraet.id) + '">Gerät bearbeiten</button> ' +
-      '<button type="button" class="knopf zart" data-ge-neu="1">Neues Gerät</button> ' +
-      (geraete.length > 1 ? loeschKnoepfe('geraet', geraet.id) : '') +
-      (gefragt && inhalt.length
-        ? '<div class="warnung">Mit dem Gerät verschwinden: ' + esc(inhalt.join(', ')) + '.</div>'
-        : '') +
-      (geraetMeldung
-        ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
-        : '') +
       '</div>';
   }
 
@@ -2832,7 +2893,7 @@
       lagezeile() +
       (bearbeiteGeraet
         ? geraetFormular(bearbeiteGeraet === 'neu' ? leeresGeraet() : geraet)
-        : schild() + geraetKnoepfe()) +
+        : schild()) +
       '<div class="werkzeuge">' +
         '<input type="search" id="suche" placeholder="Seriennummer, Beleg, Bauteil …" value="' + esc(suche) + '">' +
         '<input type="date" id="stichtag" value="' + esc(stichtag) + '" aria-label="Stichtag">' +
