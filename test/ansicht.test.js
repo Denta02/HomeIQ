@@ -97,11 +97,14 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
   p('einfach: Hersteller anklickbar', /data-direkt="hersteller"/.test(einfach), true);
   p('einfach: Preis anklickbar', /data-direkt="preis"/.test(einfach), true);
   p('einfach: Hinweis zum Tippen', /Auf einen Wert tippen/.test(einfach), true);
-  p('voll: kein direktes Bearbeiten', /data-direkt=/.test(voll), false);
+  /* Beide Ansichten bearbeiten jetzt gleich: ein Klick auf den Wert. */
+  p('voll: ebenfalls direkt bearbeitbar', /data-direkt="name"/.test(voll), true);
+  p('voll: Kategorie als Auswahl', /data-direkt="kategorie"/.test(voll), true);
+  p('voll: Nummern je Art', /data-direkt="nummer:/.test(voll), true);
+  p('voll: keine Knopfreihe mehr', /data-ge-bearbeiten=/.test(voll), false);
 
   p('einfach: Beleg loeschbar', /data-loeschen-frage="beleg"/.test(einfach), true);
-  p('einfach: Abschnitt Gerät', />Gerät<\/h2>/.test(einfach), true);
-  p('einfach: alle Angaben bearbeiten', /data-ge-bearbeiten=/.test(einfach), true);
+  p('einfach: keine Knopfreihe mehr', /data-ge-bearbeiten=/.test(einfach), false);
 
   /* Auswahl des gezeigten Anspruchs: ganzes Gerät schlägt Bauteil,
      danach entscheidet die längste Laufzeit. */
