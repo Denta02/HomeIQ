@@ -62,7 +62,6 @@ Keine Abhängigkeiten, kein `npm install` nötig. Node ab Version 18.
 | `drive-web.js` | Adapter für den Browser über Google Identity Services |
 | `belege.js` | Belegdateien in IndexedDB, getrennt vom synchronisierten JSON |
 | `app.js` | Startschicht: verbindet Speicher, Abgleich, Belege und Brücke |
-| `demodaten.js` | Beispieldaten, Anfangsbestand beim ersten Start |
 
 ## Regeln, die überall gelten
 
@@ -83,10 +82,13 @@ Keine Abhängigkeiten, kein `npm install` nötig. Node ab Version 18.
 npm run serve     ->  http://localhost:8123
 ```
 
-Beim ersten Start werden die Demodaten in den localStorage übernommen.
+Beim ersten Start ist die App leer: ein Zuhause ohne Geräte. Das erste
+Gerät kommt über das Plus auf der Übersicht. Einen Beispielbestand
+bringt die App nicht mit – `test/beispiel.js` ist eine reine
+Testvorlage und wird nicht ausgeliefert.
 Ab da bleiben Änderungen erhalten: eine Erledigung eintragen, neu laden,
-sie ist noch da. Der Knopf "Demodaten zurücksetzen" in der Kopfzeile
-stellt den Anfangsbestand wieder her.
+sie ist noch da. Der Knopf "Alles löschen" in der Kopfzeile
+leert den Bestand wieder.
 
 Belege kommen über das **+** bei den Rechnungen hinzu: Datei oder Foto
 wählen, Titel, Art, Datum. Die Datei landet in IndexedDB, die
@@ -105,6 +107,11 @@ die Selbsthilfe für dieses Gerät gesperrt wäre.
 Gelöscht wird nie auf einen Klick: der erste stellt die Frage, der
 zweite führt sie aus.
 
+In der einfachen Ansicht lässt sich jeder Wert direkt anklicken und
+ändern: Name, Standort, Hersteller, Modell, Nummer, Verkäufer, Datum
+und Preis. Enter oder Verlassen speichert, Escape verwirft. Belege lassen sich
+dort öffnen und entfernen, das Gerät selbst löschen.
+
 Oben lässt sich zwischen **Einfach** und **Alles** umschalten. Die
 einfache Ansicht zeigt nur Gerät, Kaufangaben, die laufende
 Gewährleistung und die Rechnungen – Fristen,
@@ -118,7 +125,7 @@ steht dort "Drive nicht verbunden" – das ist im Browser der Normalfall.
 
 ## Stand
 
-676 Tests. Für den Abgleich im Browser muss in beiden HTML-Dateien
+737 Tests. Für den Abgleich im Browser muss in beiden HTML-Dateien
 `window.HOMEIQ_CLIENT_ID` auf die Client-ID aus der Cloud Console
 gesetzt werden. Leer bedeutet: nur lokal.
 
