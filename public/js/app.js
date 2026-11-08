@@ -8,8 +8,8 @@
  * Ablauf beim Start:
  *   1. Speicher aufbauen
  *   2. Brücke suchen. Ist keine da (Browser), läuft alles ohne Drive.
- *   3. Laden. Ist noch nichts gespeichert, werden die Demodaten
- *      als Anfangsbestand genommen und sofort gesichert.
+ *   3. Laden. Ist noch nichts gespeichert, entsteht ein leeres
+ *      Zuhause, das sofort gesichert wird.
  *
  * Jede Änderung geht durch `speichern()`. Das schreibt lokal sofort
  * und stößt den Drive-Abgleich an, sofern eine Brücke da ist.
@@ -81,9 +81,8 @@
       zusammenfuehren: window.Speicher.zusammenfuehren
     });
 
-    /* Ein leeres Zuhause, kein Beispielbestand. Wer die App öffnet,
-       soll seine eigenen Geräte anlegen – Demodaten gibt es auf
-       Knopfdruck, nicht ungefragt. */
+    /* Ein leeres Zuhause. Wer die App öffnet, legt seine eigenen
+       Geräte an – die App bringt keinen Beispielbestand mit. */
     var vorgabe = {
       id: 'obj_' + Date.now(),
       name: 'Mein Zuhause',
@@ -109,9 +108,9 @@
       zustand.konflikte = r.konflikte || [];
       zustand.defekt = !!r.defekt;
 
-      /* Beim allerersten Start liegt nichts im Speicher. Dann sind die
-         Demodaten der Anfangsbestand und werden gleich festgeschrieben,
-         damit Änderungen daran auch bleiben. */
+      /* Beim allerersten Start liegt nichts im Speicher. Dann wird das
+         leere Zuhause gleich festgeschrieben, damit die erste Änderung
+         nicht ins Nichts läuft. */
       return zustand.speicher.laden(NAME).then(function (geladen) {
         if (!geladen.gefunden && zustand.objekt) {
           zustand.ersteinrichtung = true;
@@ -146,16 +145,6 @@
       d[feld] = wert;
       return zustand.speicher.sichern('einstellungen', d);
     });
-  }
-
-  /** Lädt den Beispielbestand. Ersetzt den bisherigen Stand. */
-  function demodatenLaden() {
-    if (!window.Demodaten || !window.Demodaten.OBJEKT) {
-      return Promise.resolve({ erfolg: false, fehler: 'Keine Beispieldaten vorhanden.' });
-    }
-    zustand.objekt = tiefeKopie(window.Demodaten.OBJEKT);
-    zustand.objekt.geaendert = new Date().toISOString();
-    return speichern().then(function () { return { erfolg: true, objekt: zustand.objekt }; });
   }
 
   /** Leert alles und beginnt von vorn. */
@@ -200,7 +189,6 @@
 
   window.App = {
     starten: starten,
-    demodatenLaden: demodatenLaden,
     einstellungLesen: einstellungLesen,
     einstellungSetzen: einstellungSetzen,
     speichern: speichern,

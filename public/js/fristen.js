@@ -129,8 +129,33 @@ const REGELN = {
     gewaehrleistung_kauf_neu: 24,
     gewaehrleistung_kauf_gebraucht: 12,
     gewaehrleistung_werk: 24  // § 634a Abs. 1 Nr. 1 BGB, ab Abnahme
+  },
+
+  /**
+   * Vorschlag für die Gewährleistung nach Art des Kaufs.
+   *
+   * ZU PRÜFEN: Die Verkürzung auf zwölf Monate bei gebrauchter Ware
+   * ist bei Verbraucherkäufen an Bedingungen geknüpft, unter anderem
+   * an eine ausdrückliche Vereinbarung. Deshalb ein Vorschlag mit
+   * sichtbarem Hinweis, keine feste Regel.
+   */
+  kaufart: {
+    neu: { monate: 24, text: 'Neuware',
+           grundlage: 'Gesetzliche Gewährleistung, 2 Jahre',
+           hinweis: '' },
+    gebraucht_haendler: { monate: 12, text: 'gebraucht vom Händler',
+           grundlage: 'Gesetzliche Gewährleistung, bei Gebrauchtware oft auf 1 Jahr verkürzt',
+           hinweis: 'Die Verkürzung gilt nur, wenn sie ausdrücklich vereinbart wurde. Im Kaufvertrag nachsehen.' },
+    gebraucht_privat: { monate: 0, text: 'gebraucht von privat',
+           grundlage: 'Privatkauf',
+           hinweis: 'Beim Privatkauf wird die Gewährleistung meist vollständig ausgeschlossen. Deshalb kein Anspruch angelegt.' }
   }
 };
+
+/** Vorschlag zur Kaufart. Unbekannte Angabe gilt als Neuware. */
+function kaufartVorschlag(art) {
+  return REGELN.kaufart[art] || REGELN.kaufart.neu;
+}
 
 function nacherfuellungGreift(vertragsDatum) {
   if (!vertragsDatum || !istGueltigesDatum(vertragsDatum)) return null; // unbekannt
@@ -560,7 +585,7 @@ function naechsteFaelligkeit(aufgabe, stichtagHeute) {
 const Fristen = {
   istSchaltjahr, tageImMonat, parseISO, formatISO, istGueltigesDatum,
   addMonate, addTage, tageZwischen, heute, addIntervall,
-  REGELN, nacherfuellungGreift,
+  REGELN, nacherfuellungGreift, kaufartVorschlag,
   berechneAnspruchEnde, bewerteStichtag, anspruchsAuskunft,
   verlaengerungNachReparatur, anspruchAusReparatur, folgeAusReparatur,
   letzteErledigung, zukuenftigeErledigungen, naechsteFaelligkeit,
