@@ -69,7 +69,9 @@ const p=(n,i,s)=>{if(JSON.stringify(i)===JSON.stringify(s))ok++;
   p('Gebäude nur als Zeile', /class="ort"/.test(voll), true);
   p('keine Ampel mehr', /class="ampel"/.test(voll), false);
   p('Verbrauch als Marke', /im Jahr/.test(voll), true);
-  p('Alles löschen angeboten', /id="leeren"/.test(voll), true);
+  p('Alle Geräte löschen unter der Liste', /id="alleFrage"/.test(voll), true);
+  p('nicht sofort scharf', /id="alleJa"/.test(voll), false);
+  p('alter Knopf verschwunden', /id="leeren"/.test(voll), false);
 
   p('Löschen je Gerät angeboten', /data-loeschen="/.test(voll), true);
   p('Löschen nicht sofort scharf', /data-loeschen-ja/.test(voll), false);
