@@ -71,6 +71,9 @@ const p=(n,i,s)=>{if(JSON.stringify(i)===JSON.stringify(s))ok++;
   p('Verbrauch als Marke', /im Jahr/.test(voll), true);
   p('Alles löschen angeboten', /id="leeren"/.test(voll), true);
 
+  p('Löschen je Gerät angeboten', /data-loeschen="/.test(voll), true);
+  p('Löschen nicht sofort scharf', /data-loeschen-ja/.test(voll), false);
+
   /* Geräteakte ohne Gerät */
   const lager2={};
   const c=bau(lager2,'?neu=1');
