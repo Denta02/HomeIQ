@@ -394,6 +394,13 @@
     font-size: 22px; line-height: 1; font-weight: 400;
     vertical-align: middle;
   }
+  .handbuchlink { margin: 8px 0 10px; font-size: 13.5px; }
+  .handbuchlink a {
+    color: var(--akzent); text-decoration: none;
+    border-bottom: 1px solid var(--akzent-hell);
+  }
+  .handbuchlink a:hover { border-bottom-color: var(--akzent); }
+
   .plushinweis {
     font-family: var(--schmal); font-size: 13px;
     color: var(--tinte-leise); margin-left: 9px; vertical-align: middle;
@@ -717,6 +724,7 @@
   .marke.reparaturrechnung  { background: var(--bald); }
   .marke.uebergabeprotokoll { background: var(--gut); }
   .marke.typenschild        { background: var(--schild-tief); }
+  .marke.handbuch           { background: var(--tinte-leise); }
 
   .leerhinweis {
     border: 1px dashed var(--akzent);
@@ -1826,7 +1834,7 @@
         erstellt: datum || stichtagStand
       }]);
 
-      belegFormular = false;
+      belegFormular = null;
       belegMeldung = { art: r.warnung ? 'hinweis' : 'erfolg',
         text: (r.warnung ? r.warnung + ' ' : '') + 'Beleg aufgenommen.' };
       sichern();
@@ -1861,20 +1869,25 @@
     sichern();
   }
 
-  function belegFormularHtml() {
-    if (!belegFormular) {
-      return '<button type="button" class="knopf plus" data-beleg-neu="1" ' +
-        'aria-label="Beleg hinzufügen">+</button>' +
-        '<span class="plushinweis">Beleg hinzufügen</span>';
+  /* Ein Formular, zwei Einstiege: aus den Rechnungen und aus dem
+     Handbuch. Der Bereich bestimmt nur die Vorauswahl der Art. */
+  function belegFormularHtml(bereich) {
+    var meiner = bereich || 'rechnung';
+    var beschriftung = meiner === 'handbuch' ? 'Handbuch hinzufügen' : 'Beleg hinzufügen';
+
+    if (belegFormular !== meiner) {
+      return '<button type="button" class="knopf plus" data-beleg-neu="' + esc(meiner) + '" ' +
+        'aria-label="' + esc(beschriftung) + '">+</button>' +
+        '<span class="plushinweis">' + esc(beschriftung) + '</span>';
     }
     return '<div class="belegformular">' +
-      '<h3>Beleg hinzufügen</h3>' +
+      '<h3>' + esc(beschriftung) + '</h3>' +
       '<label class="feld weit"><span>Datei oder Foto</span>' +
       '<input type="file" id="bl_datei" accept="image/*,application/pdf"></label>' +
       '<div class="felder">' +
         '<label class="feld weit"><span>Titel</span><input type="text" id="bl_titel" ' +
           'placeholder="bleibt leer: Dateiname"></label>' +
-        feldWahl('bl_typ', 'Art', 'kaufbeleg', DOKUMENTARTEN) +
+        feldWahl('bl_typ', 'Art', meiner === 'handbuch' ? 'handbuch' : 'kaufbeleg', DOKUMENTARTEN) +
         feldDatum('bl_datum', 'Datum', stichtagStand) +
       '</div>' +
       '<p class="zusatz">Die Datei bleibt vorerst auf diesem Gerät. ' +
@@ -1893,7 +1906,7 @@
     });
     if (!treffer.length) {
       return '<p class="leerhinweis">Kein Dokument enthält „' + esc(suche) + '“. ' +
-             'Gesucht wird auch im erkannten Text der Belege.</p>' + belegFormularHtml();
+             'Gesucht wird auch im erkannten Text der Belege.</p>' + belegFormularHtml('rechnung');
     }
     return '<ul class="liste">' + treffer.map(function (d) {
       var hatDatei = !!(d.dateiname || d.mime);
@@ -1914,7 +1927,7 @@
       (belegMeldung
         ? '<p class="meldung ' + esc(belegMeldung.art) + '">' + esc(belegMeldung.text) + '</p>'
         : '') +
-      belegFormularHtml();
+      belegFormularHtml('rechnung');
   }
 
   function DOKUMENTTEXT(typ) {
@@ -2193,7 +2206,7 @@
   var inlineMeldung = null;
   var abgleichFrage = null;   // Rückfrage beim Wiedereinschalten
   var abgleichMeldung = null;
-  var belegFormular = false;
+  var belegFormular = null;   // null, 'rechnung' oder 'handbuch'
   var belegMeldung = null;
   var loeschFrage = null;          // { art, id, aufgabeId }
 
@@ -2690,6 +2703,45 @@
    * Fristen, Wartung und Störungen bleiben bewusst draußen – wer sie
    * braucht, schaltet um.
    */
+  /**
+   * Handbuch: entweder eine hochgeladene Datei, die sich direkt
+   * öffnen lässt, oder ein Verweis auf die Herstellerseite. Beides
+   * kann nebeneinander bestehen – die Datei hat Vorrang, weil sie
+   * ohne Netz funktioniert.
+   */
+  function handbuchAbschnitt() {
+    var doku = (geraet.dokumente || []).filter(function (d) { return d.typ === 'handbuch'; })[0];
+    var url = (geraet.handbuch && geraet.handbuch.url) || '';
+    var teile = '';
+
+    if (doku) {
+      var hatDatei = !!(doku.dateiname || doku.mime);
+      teile += '<ul class="liste"><li><span>' +
+        '<span class="marke handbuch">Handbuch</span>' +
+        '<span class="titel">' + esc(doku.titel) + '</span><br>' +
+        '<span class="zusatz">' + esc(doku.dateiname || 'keine Datei hinterlegt') + '</span>' +
+        '<span class="zeilenknoepfe">' +
+          (hatDatei
+            ? '<button type="button" class="knopf" data-beleg-oeffnen="' + esc(doku.id) + '">öffnen</button> '
+            : '') +
+          loeschKnoepfe('beleg', doku.id) +
+        '</span></span>' +
+        '<span class="wert">' + deDatum(doku.erstellt) + '</span></li></ul>';
+    }
+
+    /* Der Verweis steht immer zur Verfügung, auch neben einer Datei –
+       Hersteller aktualisieren Anleitungen. */
+    teile += '<p class="handbuchlink">' +
+      (url
+        ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Anleitung beim Hersteller öffnen</a> · '
+        : '') +
+      direkt('handbuch', url ? 'Verweis ändern' : '') + '</p>';
+
+    if (!doku) teile += belegFormularHtml('handbuch');
+
+    return '<section><h2>Handbuch</h2>' + teile + '</section>';
+  }
+
   function einfacheAnsicht() {
     var i = geraet.identitaet || {};
     var nummern = nummernAusGeraet(geraet).filter(function (n) { return n && n.wert; });
@@ -2755,7 +2807,7 @@
 
     belegListe += (belegMeldung
       ? '<p class="meldung ' + esc(belegMeldung.art) + '">' + esc(belegMeldung.text) + '</p>'
-      : '') + belegFormularHtml();
+      : '') + belegFormularHtml('rechnung');
 
     return '<div class="schild">' +
         schildKopf() +
@@ -2785,6 +2837,8 @@
       '</section>' +
 
       schutz +
+
+      handbuchAbschnitt() +
 
       '<section><h2>Rechnungen</h2>' + belegListe + '</section>' +
 
@@ -3190,12 +3244,15 @@
       zeichnen(); return;
     }
 
-    if (e.target.closest('[data-beleg-neu]')) {
-      alleSchliessen(null); belegFormular = true; belegMeldung = null; zeichnen(); return;
+    var blNeu = e.target.closest('[data-beleg-neu]');
+    if (blNeu) {
+      alleSchliessen(null);
+      belegFormular = blNeu.getAttribute('data-beleg-neu') || 'rechnung';
+      belegMeldung = null; zeichnen(); return;
     }
     if (e.target.closest('[data-beleg-speichern]')) { alleSchliessen(null); belegAufnehmen(); return; }
     if (e.target.closest('[data-beleg-abbrechen]')) {
-      alleSchliessen(null); belegFormular = false;
+      alleSchliessen(null); belegFormular = null;
       belegMeldung = { art: 'hinweis', text: 'Abgebrochen, nichts aufgenommen.' };
       zeichnen(); return;
     }
