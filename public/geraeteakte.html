@@ -53,6 +53,30 @@
     padding: 20px 16px 16px;
     margin-top: 16px;
   }
+  .schildkopf {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px;
+  }
+  .schildkopf h1 { flex: 1 1 auto; min-width: 0; }
+
+  .wegknopf {
+    flex: 0 0 auto;
+    font-family: var(--schmal); font-size: 13px; font-weight: 600;
+    background: var(--abgelaufen); color: #fff;
+    border: 0; border-radius: 999px;
+    padding: 6px 14px; cursor: pointer;
+  }
+  .wegknopf:hover { background: #8C1D16; }
+  .wegknopf:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .wegknopf.zurueck { background: transparent; color: var(--akzent-hell); }
+  .wegknopf.zurueck:hover { background: rgba(255,255,255,.14); }
+  .wegfrage { display: flex; gap: 6px; flex: 0 0 auto; }
+  .wegwarnung {
+    margin: 8px 0 0; padding: 8px 11px;
+    background: rgba(168,45,34,.25); border-left: 3px solid var(--abgelaufen);
+    font-size: 12.5px; color: #FFD9D4;
+  }
+
   .schild h1 {
     font-family: var(--schmal);
     font-size: 27px;
@@ -1187,6 +1211,28 @@
     return teile;
   }
 
+  /* Kopfzeile des Typenschilds: Name links, Löschen rechts.
+     Beide Ansichten benutzen denselben Baustein, damit sie nicht
+     auseinanderlaufen. */
+  function schildKopf() {
+    var gefragt = loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id;
+    var inhalt = geraetInhalt(geraet);
+
+    return '<div class="schildkopf">' +
+      '<h1>' + direkt('name', geraet.name) + '</h1>' +
+      (gefragt
+        ? '<span class="wegfrage">' +
+          '<button type="button" class="wegknopf ja" data-loeschen-ja="1">Ja, löschen</button>' +
+          '<button type="button" class="wegknopf zurueck" data-loeschen-nein="1">Abbrechen</button>' +
+          '</span>'
+        : '<button type="button" class="wegknopf" data-loeschen-frage="geraet" ' +
+          'data-id="' + esc(geraet.id) + '">löschen</button>') +
+      '</div>' +
+      (gefragt && inhalt.length
+        ? '<p class="wegwarnung">Mit dem Gerät verschwinden: ' + esc(inhalt.join(', ')) + '.</p>'
+        : '');
+  }
+
   function schild() {
     var i = geraet.identitaet;
     var nummern = nummernAusGeraet(geraet);
@@ -1247,7 +1293,7 @@
       .join('');
 
     return '<div class="schild">' +
-      '<h1>' + direkt('name', geraet.name) + '</h1>' +
+      schildKopf() +
       '<p class="ort">' + direkt('standort', geraet.standort) + '</p>' +
       '<dl class="paare">' + zeilen + '</dl>' +
       (inlineMeldung
@@ -2193,7 +2239,10 @@
       objekt.geraete = geraete;
       if (aktivIdx >= geraete.length) aktivIdx = Math.max(0, geraete.length - 1);
       geraet = geraete[aktivIdx] || null;
-      geraetMeldung = { art: 'hinweis', text: 'Gerät gelöscht.' };
+      /* Das angesehene Gerät ist weg – zurück zur Übersicht, statt
+         wortlos ein anderes zu zeigen. */
+      sichern().then(function () { window.location.href = 'index.html'; });
+      return;
     } else if (f.art === 'aufgabe') {
       geraet.aufgaben = (geraet.aufgaben || []).filter(function (x) { return x.id !== f.id; });
       if (bearbeiteAufgabe === f.id) bearbeiteAufgabe = null;
@@ -2709,7 +2758,7 @@
       : '') + belegFormularHtml();
 
     return '<div class="schild">' +
-        '<h1>' + direkt('name', geraet.name) + '</h1>' +
+        schildKopf() +
         '<p class="ort">' + direkt('standort', geraet.standort) + '</p>' +
         '<dl class="paare">' +
           zeile('Hersteller', i.hersteller, 'hersteller') +
