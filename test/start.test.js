@@ -26,7 +26,7 @@ function bau(lager, suche){
   const win={localStorage:{getItem:k=>k in lager?lager[k]:null,setItem:(k,v)=>{lager[k]=String(v);},removeItem:k=>{delete lager[k];}},
     location:{search:suche||'',reload(){},href:''},setTimeout,clearTimeout,prompt:()=>null};
   win.document={readyState:'complete',getElementById:mach,querySelectorAll:()=>[],querySelector:()=>null,addEventListener(){}};
-  ['fristen','hersteller','selbsthilfe','intervalle','brennstoff','objekt','speicher','sync','drive','drive-web','belege','demodaten','app']
+  ['fristen','hersteller','selbsthilfe','intervalle','brennstoff','objekt','speicher','sync','drive','drive-web','belege','app']
    .forEach(m=>new Function('window','module','document',fs.readFileSync(P+'js/'+m+'.js','utf8'))(win,{exports:{}},win.document));
   return {win,mach};
 }
@@ -44,14 +44,18 @@ const p=(n,i,s)=>{if(JSON.stringify(i)===JSON.stringify(s))ok++;
   p('kein Demobestand', /Laptop Dell/.test(leer), false);
   p('Aufforderung statt Meldung', /Noch kein Gerät erfasst/.test(leer), true);
   p('Gerät anlegen erreichbar', /geraeteakte\.html\?neu=1/.test(leer), true);
-  p('Beispieldaten als zweite Wahl', /id="beispiele"/.test(leer), true);
+  p('kein Angebot für Beispieldaten', /id="beispiele"/.test(leer), false);
   p('kein Brennpunkt ohne Geräte', /class="brennpunkt/.test(leer), false);
   p('gespeichert', Object.keys(lager).includes('homeiq:objekt'), true);
 
-  /* Beispieldaten laden */
-  const r=await a.win.App.demodatenLaden();
-  p('Beispieldaten geladen', r.erfolg, true);
-  p('zwei Geräte', r.objekt.geraete.length, 2);
+  /* Die App bringt keine Beispieldaten mit */
+  p('kein Lader in der App', typeof a.win.App.demodatenLaden, 'undefined');
+
+  /* Für die zweite Sitzung werden Geräte wie von Hand angelegt */
+  const Beispiel=require('./beispiel.js');
+  const stand=JSON.parse(lager['homeiq:objekt']);
+  stand.geraete=JSON.parse(JSON.stringify(Beispiel.OBJEKT.geraete));
+  lager['homeiq:objekt']=JSON.stringify(stand);
 
   /* Zweiter Start mit Bestand */
   const b=bau(lager);

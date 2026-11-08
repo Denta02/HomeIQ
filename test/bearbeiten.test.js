@@ -254,5 +254,42 @@ function geraet(){ return { lieferungen:[L('a','2024-09-10',2800,2632,true),
   p('richtiges Geraet aktiv', liste[idx].id, 'b');
 }
 
+
+/* --- Kaufart steuert den ersten Anspruch --- */
+{
+  p('Neuware 24 Monate', F.kaufartVorschlag('neu').monate, 24);
+  p('Haendler gebraucht 12', F.kaufartVorschlag('gebraucht_haendler').monate, 12);
+  p('privat ohne Anspruch', F.kaufartVorschlag('gebraucht_privat').monate, 0);
+  p('unbekannt faellt auf Neuware', F.kaufartVorschlag('quatsch').monate, 24);
+  p('Haendlerkauf mit Vorbehalt',
+    F.kaufartVorschlag('gebraucht_haendler').hinweis.indexOf('ausdrücklich') !== -1, true);
+  p('Privatkauf begruendet',
+    F.kaufartVorschlag('gebraucht_privat').hinweis.indexOf('ausgeschlossen') !== -1, true);
+
+  /* So baut das Formular den Anspruch */
+  function ersterAnspruch(kauf) {
+    const v = F.kaufartVorschlag(kauf.art);
+    if (!(v.monate > 0) || !F.istGueltigesDatum(kauf.datum)) return null;
+    return { id:'a', art:'gewaehrleistung_kauf', bezug:'geraet', aktiv:true,
+      gegenueber:{rolle:'verkaeufer',name:kauf.verkaeufer||''},
+      beginn:kauf.datum, beginnKey:'uebergabe', dauerMonate:v.monate,
+      endeManuell:null, grundlage:v.grundlage, verlaengerungen:[] };
+  }
+
+  const neuKauf = { art:'neu', datum:'2026-08-15', verkaeufer:'Media Markt' };
+  p('Neuware endet nach zwei Jahren',
+    F.berechneAnspruchEnde(ersterAnspruch(neuKauf)).ende, '2028-08-15');
+  p('Gebraucht endet nach einem Jahr',
+    F.berechneAnspruchEnde(ersterAnspruch({...neuKauf, art:'gebraucht_haendler'})).ende, '2027-08-15');
+  p('Privatkauf erzeugt nichts',
+    ersterAnspruch({...neuKauf, art:'gebraucht_privat'}), null);
+  p('ohne Kaufdatum kein Anspruch',
+    ersterAnspruch({...neuKauf, datum:''}), null);
+  p('Verkaeufer uebernommen',
+    ersterAnspruch(neuKauf).gegenueber.name, 'Media Markt');
+  p('Grundlage benannt',
+    ersterAnspruch({...neuKauf, art:'gebraucht_haendler'}).grundlage.indexOf('verkürzt') !== -1, true);
+}
+
 console.log('\n'+ok+' bestanden, '+fehler+' fehlgeschlagen');
 process.exit(fehler?1:0);

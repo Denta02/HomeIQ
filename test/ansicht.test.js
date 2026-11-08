@@ -7,7 +7,7 @@ const P = require('path').join(__dirname, '..', 'public') + '/';
 /* Die App startet jetzt leer. Für diese Prüfungen wird der
    Beispielbestand vorher in den Speicher gelegt. */
 function beispieleEinlegen(lager) {
-  const D = require(P + 'js/demodaten.js');
+  const D = require('./beispiel.js');
   const objekt = JSON.parse(JSON.stringify(D.OBJEKT));
   objekt.schemaVersion = 1;
   objekt.gespeichert = new Date().toISOString();
@@ -34,7 +34,7 @@ function bau(lager) {
   const win={localStorage:{getItem:k=>k in lager?lager[k]:null,setItem:(k,v)=>{lager[k]=String(v);},removeItem:k=>{delete lager[k];}},
     location:{search:'',reload(){}},setTimeout,clearTimeout};
   win.document={readyState:'complete',getElementById:mach,querySelectorAll:()=>[],querySelector:()=>null,addEventListener(){}};
-  ['fristen','hersteller','selbsthilfe','intervalle','brennstoff','objekt','speicher','sync','drive','drive-web','belege','demodaten','app']
+  ['fristen','hersteller','selbsthilfe','intervalle','brennstoff','objekt','speicher','sync','drive','drive-web','belege','app']
     .forEach(m=>new Function('window','module','document',fs.readFileSync(P+'js/'+m+'.js','utf8'))(win,{exports:{}},win.document));
   const html=fs.readFileSync(P+'geraeteakte.html','utf8');
   new Function('window','document',seitenSkript(html))(win,win.document);
@@ -92,6 +92,16 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
      Dann darf auch kein "öffnen" angeboten werden. */
   p('ohne Datei kein Oeffnen', /data-beleg-oeffnen/.test(voll), false);
   p('loeschen trotzdem moeglich', /data-loeschen-frage="beleg"/.test(voll), true);
+
+  p('einfach: Werte anklickbar', /data-direkt="name"/.test(einfach), true);
+  p('einfach: Hersteller anklickbar', /data-direkt="hersteller"/.test(einfach), true);
+  p('einfach: Preis anklickbar', /data-direkt="preis"/.test(einfach), true);
+  p('einfach: Hinweis zum Tippen', /Auf einen Wert tippen/.test(einfach), true);
+  p('voll: kein direktes Bearbeiten', /data-direkt=/.test(voll), false);
+
+  p('einfach: Beleg loeschbar', /data-loeschen-frage="beleg"/.test(einfach), true);
+  p('einfach: Abschnitt Gerät', />Gerät<\/h2>/.test(einfach), true);
+  p('einfach: alle Angaben bearbeiten', /data-ge-bearbeiten=/.test(einfach), true);
 
   /* Auswahl des gezeigten Anspruchs: ganzes Gerät schlägt Bauteil,
      danach entscheidet die längste Laufzeit. */

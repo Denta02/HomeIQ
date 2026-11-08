@@ -18,7 +18,7 @@ function fenster(lager) {
     setTimeout, clearTimeout, document: { addEventListener(){} }
   };
   ['fristen','hersteller','selbsthilfe','intervalle','brennstoff','objekt',
-   'speicher','sync','drive','drive-web','belege','demodaten','app'].forEach(m => {
+   'speicher','sync','drive','drive-web','belege','app'].forEach(m => {
     new Function('window','module','document',
       fs.readFileSync(P+'js/'+m+'.js','utf8'))(win, {exports:{}}, win.document);
   });
@@ -31,21 +31,21 @@ function fenster(lager) {
   const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
     else {fehler++; console.log('FEHLER: '+n+'\n  ist:  '+JSON.stringify(i)+'\n  soll: '+JSON.stringify(s));} };
 
-  // Sitzung 1: Start mit leerem Speicher -> leeres Zuhause, keine Demodaten
+  // Sitzung 1: Start mit leerem Speicher -> leeres Zuhause
   const w1 = fenster(lager);
   const z1 = await w1.App.starten();
   p('leerer Anfangsbestand', z1.objekt.geraete.length, 0);
   p('Vorgabename', z1.objekt.name, 'Mein Zuhause');
   p('in den Speicher geschrieben', Object.keys(lager).includes('homeiq:objekt'), true);
 
-  // Beispieldaten auf Knopfdruck
-  const bsp = await w1.App.demodatenLaden();
-  p('Beispieldaten geladen', bsp.erfolg, true);
-  p('zwei Geraete', bsp.objekt.geraete.length, 2);
-  p('Objekt uebernommen', bsp.objekt.name, 'Haus Musterstraße 5');
+  // Ein Gerät anlegen, wie es die Oberfläche tut
+  const Beispiel = require('./beispiel.js');
+  z1.objekt.geraete = JSON.parse(JSON.stringify(Beispiel.OBJEKT.geraete));
+  await w1.App.speichern();
+  p('zwei Geraete angelegt', z1.objekt.geraete.length, 2);
 
   // Änderung: Erledigung an einer Aufgabe
-  const laptop = bsp.objekt.geraete[0];
+  const laptop = z1.objekt.geraete[0];
   laptop.aufgaben[0].erledigungen.push({ id:'erl_neu', datum:'2028-06-01', ausfuehrender:'selbst' });
   const r = await w1.App.speichern();
   p('Speichern erfolgreich', r.erfolg, true);

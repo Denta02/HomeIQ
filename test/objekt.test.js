@@ -1,6 +1,6 @@
 const O = require('../public/js/objekt.js');
 const F = require('../public/js/fristen.js');
-const D = require('../public/js/demodaten.js');
+const D = require('./beispiel.js');
 let ok=0, fehler=0;
 function p(n,ist,soll){const g=JSON.stringify(ist)===JSON.stringify(soll);
  if(g)ok++;else{fehler++;console.log('FEHLER: '+n+'\n  ist:  '+JSON.stringify(ist)+'\n  soll: '+JSON.stringify(soll));}}
