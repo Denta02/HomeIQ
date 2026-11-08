@@ -146,11 +146,6 @@
   .anfang h2 { font-size: 21px; font-weight: 600; margin: 0 0 8px; letter-spacing: -0.01em; }
   .anfang p { color: var(--leise); margin: 0 auto 22px; max-width: 34em; font-size: 15px; }
   .anfang .plus { margin-bottom: 14px; }
-  .anfang .zweit {
-    display: block; margin: 0 auto; font: inherit; font-size: 14.5px;
-    background: none; border: 0; color: var(--akzent); cursor: pointer;
-    text-decoration: underline; text-underline-offset: 3px;
-  }
 
   /* ---------- Was ansteht ---------- */
 
@@ -227,7 +222,7 @@
     <p>Diese Dateien müssen im Ordner <code>js/</code> liegen: <code>fristen.js</code>,
        <code>brennstoff.js</code>, <code>objekt.js</code>, <code>speicher.js</code>,
        <code>sync.js</code>, <code>drive.js</code>, <code>belege.js</code>,
-       <code>demodaten.js</code> und <code>app.js</code>.</p>
+       <code>app.js</code>.</p>
   </div>
 </div>
 
@@ -245,7 +240,6 @@
 <script src="js/drive.js"></script>
 <script src="js/drive-web.js"></script>
 <script src="js/belege.js"></script>
-<script src="js/demodaten.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function () {
@@ -359,7 +353,6 @@
       '<p>Leg das erste an: Waschmaschine, Heizung, Laptop. HomeIQ merkt sich, ' +
       'bis wann die Gewährleistung läuft und wann die nächste Wartung fällig ist.</p>' +
       '<a class="plus" href="geraeteakte.html?neu=1"><span>+</span>Gerät anlegen</a>' +
-      '<button type="button" class="zweit" id="beispiele">Erst mit Beispieldaten ansehen</button>' +
       '</div>';
   }
 
@@ -455,16 +448,6 @@
 
     var mehr = document.getElementById('mehr');
     if (mehr) mehr.addEventListener('toggle', function () { alleOffen = mehr.open; });
-
-    var bsp = document.getElementById('beispiele');
-    if (bsp) bsp.addEventListener('click', function () {
-      bsp.disabled = true;
-      window.App.demodatenLaden().then(function (r) {
-        if (r.erfolg) { objekt = r.objekt; meldung = null; }
-        else { meldung = r.fehler; }
-        zeichnen();
-      });
-    });
 
     /* Zwei Klicks, kein Browser-Dialog: der erste fragt, der zweite löscht. */
     var leeren = document.getElementById('leeren');

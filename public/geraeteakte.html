@@ -429,6 +429,30 @@
   .schutzblock.bald .gross, .schutzblock.laeuft_heute_ab .gross { color: var(--bald); }
   .schutzblock .zusatz { font-size: 13px; color: var(--tinte-leise); }
 
+  .direkt {
+    font: inherit; color: inherit; text-align: left;
+    background: none; border: 0; padding: 1px 2px; margin: -1px -2px;
+    cursor: text;
+    border-bottom: 1px dashed rgba(127,127,127,.55);
+  }
+  .direkt:hover { background: rgba(14,110,115,.1); border-bottom-color: var(--akzent); }
+  .direkt:focus-visible { outline: 2px solid var(--akzent); outline-offset: 2px; }
+  .direkt.leer { color: var(--tinte-leise); font-style: italic; }
+  .schild .direkt.leer { color: var(--akzent-hell); opacity: .65; }
+  .schild h1 .direkt { color: #fff; }
+  .schild .ort .direkt { color: var(--akzent-hell); }
+
+  .direkt-feld {
+    font: inherit; color: var(--tinte);
+    background: #fff; border: 1px solid var(--akzent);
+    border-radius: 4px; padding: 2px 6px; max-width: 100%;
+  }
+
+  .tipphinweis {
+    margin: 14px 0 0; font-size: 12px;
+    color: var(--akzent-hell); opacity: .6;
+  }
+
   .umschalthinweis {
     margin-top: 24px; padding: 11px 13px;
     background: var(--akzent-hell); border-left: 4px solid var(--akzent);
@@ -595,6 +619,11 @@
   }
   .stufenzeile.frei { background: var(--wash-gruen); border-left-color: var(--gut); color: var(--gut); }
   .stufenzeile.eingeschraenkt { background: var(--wash-gelb); border-left-color: var(--bald); color: var(--bald); }
+  .kaufhinweis {
+    margin: 2px 0 12px; padding: 9px 11px;
+    background: var(--akzent-hell); border-left: 4px solid var(--akzent);
+    font-size: 12.5px; line-height: 1.45; color: var(--tinte);
+  }
   .stufenzeile.gesperrt { background: var(--wash-rot); border-left-color: var(--abgelaufen); color: var(--abgelaufen); }
 
   .geraetknoepfe { margin: 10px 0 0; }
@@ -716,7 +745,6 @@
 <script src="js/sync.js"></script>
 <script src="js/drive.js"></script>
 <script src="js/drive-web.js"></script>
-<script src="js/demodaten.js"></script>
 <script src="js/app.js"></script>
 <script>
 (function () {
@@ -724,7 +752,7 @@
 
   if (typeof window.Fristen === 'undefined' || typeof window.Hersteller === 'undefined' ||
       typeof window.Selbsthilfe === 'undefined' || typeof window.Intervalle === 'undefined' ||
-      typeof window.Brennstoff === 'undefined' || typeof window.Demodaten === 'undefined' ||
+      typeof window.Brennstoff === 'undefined' ||
       typeof window.Speicher === 'undefined' || typeof window.Sync === 'undefined' ||
       typeof window.App === 'undefined' || typeof window.Belege === 'undefined') {
     document.getElementById('ladefehler').hidden = false;
@@ -737,7 +765,7 @@
   var BR = window.Brennstoff;
 
   /* ============================================================
-   * Demodaten – das Laptop-Szenario aus dem Datenmodell
+   * Geräteliste – wird beim Start aus dem Speicher gefüllt
    * ============================================================ */
 
   /* Wird beim Start gefüllt. Vorher wird nicht gezeichnet. */
@@ -930,7 +958,12 @@
     var wertNach = {};
     (nummern || []).forEach(function (n) { if (n && n.art) wertNach[n.art] = n.wert || ''; });
 
-    var felder = schema.nummern.map(function (f) {
+    /* "modell" steht schon als eigenes Feld oben beim Hersteller.
+       Zweimal dasselbe abzufragen verwirrt und führt zu zwei
+       Wahrheiten im Datensatz. */
+    var felder = schema.nummern.filter(function (f) {
+      return f.art !== 'modell';
+    }).map(function (f) {
       return '<label class="feld"><span>' + esc(f.label) + (f.pflicht ? ' *' : '') + '</span>' +
         '<input type="text" class="ge_nummer" data-art="' + esc(f.art) + '" value="' +
         esc(wertNach[f.art] || '') + '"></label>';
@@ -952,6 +985,21 @@
           (schema.geprueft ? '' : ' (noch nicht verifiziert)')) + '</p>';
   }
 
+  /* Was die Kaufart für die Gewährleistung bedeutet. Beim Anlegen
+     wird der Anspruch gleich mit erzeugt, beim Bearbeiten nicht –
+     dort gibt es ihn schon und er darf nicht überschrieben werden. */
+  function kaufHinweisText(art, istNeu) {
+    var v = F.kaufartVorschlag(art);
+    if (!istNeu) {
+      return 'Die Kaufart ändert bestehende Ansprüche nicht. Fristen bearbeitest du bei den Ansprüchen.';
+    }
+    if (!v.monate) {
+      return v.hinweis;
+    }
+    return 'Daraus wird ein Anspruch über ' + v.monate + ' Monate angelegt, gerechnet ab der Übergabe.' +
+      (v.hinweis ? ' ' + v.hinweis : '');
+  }
+
   function geraetFormular(g) {
     var neu = bearbeiteGeraet === 'neu';
     var urteil = SH.bewerteAnliegen(g.kategorie, '');
@@ -962,9 +1010,12 @@
         '<label class="feld weit"><span>Name</span><input type="text" id="ge_name" value="' +
           esc(g.name) + '" placeholder="z. B. Waschmaschine Küche"></label>' +
         feldWahl('ge_kategorie', 'Kategorie', g.kategorie, KATEGORIEN) +
-        feldWahl('ge_status', 'Status', g.status || 'aktiv', [
+        /* Beim Anlegen ist der Status immer "in Benutzung" – sonst
+           würde man das Gerät nicht erfassen. Die Auswahl erscheint
+           erst beim Bearbeiten, wo sie etwas bedeutet. */
+        (neu ? '' : feldWahl('ge_status', 'Status', g.status || 'aktiv', [
           ['aktiv', 'in Benutzung'], ['in_reparatur', 'in Reparatur'],
-          ['ausgemustert', 'ausgemustert'], ['ersetzt', 'ersetzt']]) +
+          ['ausgemustert', 'ausgemustert'], ['ersetzt', 'ersetzt']])) +
         '<label class="feld weit"><span>Standort</span><input type="text" id="ge_standort" value="' +
           esc(g.standort) + '" placeholder="Raum, Gebäude"></label>' +
         feldText('ge_hersteller', 'Hersteller', g.identitaet.hersteller, 'z. B. Bosch') +
@@ -978,6 +1029,10 @@
       '</div>' +
       '<h3 class="ablaufkopf">Kauf</h3>' +
       '<div class="felder">' +
+        feldWahl('ge_kaufart', 'Gekauft als', (g.kauf && g.kauf.art) || 'neu', [
+          ['neu', 'neu'],
+          ['gebraucht_haendler', 'gebraucht, vom Händler'],
+          ['gebraucht_privat', 'gebraucht, von privat']]) +
         feldDatum('ge_kaufdatum', 'Übergabe', g.kauf.datum) +
         feldDatum('ge_vertrag', 'Vertragsschluss', g.kauf.vertragsDatum) +
         '<label class="feld weit"><span>Verkäufer</span><input type="text" id="ge_verkaeufer" value="' +
@@ -989,6 +1044,8 @@
         '<label class="feld weit"><span>Notiz</span><input type="text" id="ge_notiz" value="' +
           esc(g.notiz || '') + '"></label>' +
       '</div>' +
+      '<p class="kaufhinweis" id="ge_kaufhinweis">' +
+        esc(kaufHinweisText((g.kauf && g.kauf.art) || 'neu', neu)) + '</p>' +
       (geraetMeldung
         ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
         : '') +
@@ -1015,7 +1072,7 @@
       id: vorlage.id,
       name: wertVon('ge_name'),
       kategorie: wertVon('ge_kategorie'),
-      status: wertVon('ge_status'),
+      status: wertVon('ge_status') || vorlage.status || 'aktiv',
       standort: wertVon('ge_standort'),
       notiz: wertVon('ge_notiz'),
       identitaet: {
@@ -1026,6 +1083,7 @@
         typenschildFotoId: vorlage.identitaet ? vorlage.identitaet.typenschildFotoId : null
       },
       kauf: {
+        art: wertVon('ge_kaufart') || 'neu',
         datum: wertVon('ge_kaufdatum'),
         vertragsDatum: wertVon('ge_vertrag'),
         verkaeufer: wertVon('ge_verkaeufer'),
@@ -1073,6 +1131,28 @@
     }
 
     if (neu) {
+      /* Aus Kaufdatum, Verkäufer und Kaufart entsteht sofort der
+         erste Anspruch. Sonst müsste ihn jeder von Hand nachtragen,
+         und genau dafür ist die App da. */
+      var v = F.kaufartVorschlag(g.kauf.art);
+      if (v.monate > 0 && F.istGueltigesDatum(g.kauf.datum)) {
+        g.ansprueche = [{
+          id: 'ans_' + Date.now(),
+          art: 'gewaehrleistung_kauf',
+          bezug: 'geraet',
+          bauteil: '',
+          gegenueber: { rolle: 'verkaeufer', name: g.kauf.verkaeufer || '' },
+          beginn: g.kauf.datum,
+          beginnKey: 'uebergabe',
+          beginnBezeichnung: 'Übergabe',
+          dauerMonate: v.monate,
+          endeManuell: null,
+          grundlage: v.grundlage,
+          verlaengerungen: [],
+          belegDokumentId: null,
+          aktiv: true
+        }];
+      }
       geraete.push(g);
       aktivIdx = geraete.length - 1;
     } else {
@@ -1083,7 +1163,11 @@
     objekt.geraete = geraete;
     geraet = geraete[aktivIdx];
     bearbeiteGeraet = null;
-    geraetMeldung = { art: 'erfolg', text: neu ? 'Gerät angelegt.' : 'Gerät geändert.' };
+    geraetMeldung = { art: 'erfolg', text: neu
+      ? 'Gerät angelegt' + ((g.ansprueche || []).length
+          ? ', Gewährleistung bis ' + deDatum(F.berechneAnspruchEnde(g.ansprueche[0]).ende) + '.'
+          : '. Ohne Gewährleistungsanspruch.')
+      : 'Gerät geändert.' };
     var erstes = neu && geraete.length === 1;
     sichern().then(function () {
       /* Beim allerersten Gerät zurück zur Übersicht – dort sieht man,
@@ -1128,6 +1212,7 @@
     /* Zuerst die Nummern in der Reihenfolge des Herstellerschemas … */
     schema.nummern.forEach(function (feld) {
       if (feld.rolle === 'variante') return;   // steckt in der Modellnummer
+      if (feld.art === 'modell') return;       // steht schon als eigene Zeile
       var wert = wertNach[feld.art];
       if (!wert && !feld.pflicht) return;      // Optionales ohne Wert nicht zeigen
       zeilen += paar(feld.label, wert, String(wert || '').length > 14);
@@ -2043,6 +2128,8 @@
   var bearbeiteGeraet = null;      // id oder 'neu'
   var geraetMeldung = null;
   var ansicht = 'alles';   // 'einfach' oder 'alles'
+  var inlineFeld = null;   // welches Feld gerade direkt bearbeitet wird
+  var inlineMeldung = null;
   var abgleichFrage = null;   // Rückfrage beim Wiedereinschalten
   var abgleichMeldung = null;
   var belegFormular = false;
@@ -2321,6 +2408,131 @@
     });
   }
 
+  /* ============================================================
+   * Direktes Bearbeiten in der einfachen Ansicht
+   * ============================================================
+   * Ein Klick auf den Wert macht ihn zum Eingabefeld. Enter oder
+   * Verlassen speichert, Escape verwirft. Kein eigener Bearbeiten-
+   * Modus, weil die einfache Ansicht sonst wieder kompliziert wird.
+   */
+
+  var INLINE = {
+    name: {
+      label: 'Name', typ: 'text',
+      lesen: function () { return geraet.name; },
+      schreiben: function (w) {
+        if (!String(w).trim()) return 'Ohne Namen ist das Gerät nicht zu finden.';
+        geraet.name = String(w).trim();
+      }
+    },
+    standort: {
+      label: 'Standort', typ: 'text',
+      lesen: function () { return geraet.standort; },
+      schreiben: function (w) { geraet.standort = String(w).trim(); }
+    },
+    hersteller: {
+      label: 'Hersteller', typ: 'text',
+      lesen: function () { return geraet.identitaet.hersteller; },
+      schreiben: function (w) { geraet.identitaet.hersteller = String(w).trim(); }
+    },
+    modell: {
+      label: 'Modell', typ: 'text',
+      lesen: function () { return geraet.identitaet.modell; },
+      schreiben: function (w) { geraet.identitaet.modell = String(w).trim(); }
+    },
+    nummer: {
+      label: 'Nummer', typ: 'text',
+      lesen: function () {
+        var n = nummernAusGeraet(geraet).filter(function (x) { return x && x.wert; })[0];
+        return n ? n.wert : '';
+      },
+      schreiben: function (w) {
+        var wert = String(w).trim();
+        var liste = nummernAusGeraet(geraet);
+        var erste = liste.filter(function (x) { return x && x.wert; })[0];
+        if (erste) {
+          erste.wert = wert;
+        } else if (wert) {
+          /* Noch keine Nummer: die Art kommt aus dem Herstellerschema,
+             damit sie später im richtigen Feld steht. */
+          var schema = HS.schemaFuer(geraet.identitaet.hersteller);
+          var pflicht = schema.nummern.filter(function (f) {
+            return f.pflicht && f.art !== 'modell';
+          })[0] || schema.nummern[0];
+          liste.push({ art: pflicht ? pflicht.art : 'unbekannt', wert: wert });
+        }
+        geraet.identitaet.nummern = liste;
+      }
+    },
+    verkaeufer: {
+      label: 'Verkäufer', typ: 'text',
+      lesen: function () { return geraet.kauf.verkaeufer; },
+      schreiben: function (w) { geraet.kauf.verkaeufer = String(w).trim(); }
+    },
+    kaufdatum: {
+      label: 'Kaufdatum', typ: 'datum',
+      lesen: function () { return geraet.kauf.datum; },
+      schreiben: function (w) {
+        if (w && !F.istGueltigesDatum(w)) return 'Das Datum ist ungültig.';
+        geraet.kauf.datum = w;
+      }
+    },
+    preis: {
+      label: 'Preis', typ: 'geld',
+      lesen: function () {
+        return geraet.kauf.preisCent ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') : '';
+      },
+      schreiben: function (w) {
+        var t = String(w).trim();
+        if (!t) { geraet.kauf.preisCent = 0; return; }
+        var cent = zuHundertstel(t);
+        if (cent === null) return 'Der Preis ist keine gültige Zahl, zum Beispiel 29,99.';
+        geraet.kauf.preisCent = cent;
+      }
+    }
+  };
+
+  /** Wert als anklickbarer Text oder, wenn gerade dran, als Eingabe. */
+  function direkt(schluessel, anzeige) {
+    var f = INLINE[schluessel];
+    if (!f) return esc(anzeige || '');
+
+    if (inlineFeld === schluessel) {
+      var roh = f.lesen() || '';
+      var typ = f.typ === 'datum' ? 'date' : 'text';
+      return '<input class="direkt-feld" type="' + typ + '" id="direkt_' + esc(schluessel) + '" ' +
+        'value="' + esc(roh) + '" aria-label="' + esc(f.label) + '">';
+    }
+
+    var leer = !anzeige || !String(anzeige).trim();
+    return '<button type="button" class="direkt' + (leer ? ' leer' : '') +
+      '" data-direkt="' + esc(schluessel) + '" title="' + esc(f.label) + ' ändern">' +
+      esc(leer ? 'eintragen' : anzeige) + '</button>';
+  }
+
+  function direktSpeichern() {
+    if (!inlineFeld) return;
+    var f = INLINE[inlineFeld];
+    var feld = document.getElementById('direkt_' + inlineFeld);
+    if (!f || !feld) { inlineFeld = null; zeichnen(); return; }
+
+    var fehler = f.schreiben(feld.value);
+    if (fehler) {
+      inlineMeldung = { art: 'fehler', text: fehler };
+      zeichnen(); return;
+    }
+    inlineFeld = null;
+    inlineMeldung = null;
+    geraet.geaendert = new Date().toISOString();
+    sichern();
+  }
+
+  function direktAbbrechen() {
+    inlineFeld = null;
+    inlineMeldung = null;
+    zeichnen();
+  }
+
   function ansichtWahl() {
     return '<div class="ansichtwahl">' +
       '<button type="button" class="reiter klein' + (ansicht === 'einfach' ? ' aktiv' : '') +
@@ -2339,10 +2551,9 @@
     var i = geraet.identitaet || {};
     var nummern = nummernAusGeraet(geraet).filter(function (n) { return n && n.wert; });
 
-    var zeile = function (label, wert) {
-      var leer = !wert || !String(wert).trim();
+    var zeile = function (label, wert, schluessel) {
       return '<div class="paar"><dt>' + esc(label) + '</dt>' +
-        '<dd class="' + (leer ? 'leer' : '') + '">' + esc(leer ? 'nicht erfasst' : wert) + '</dd></div>';
+        '<dd>' + direkt(schluessel, wert) + '</dd></div>';
     };
 
     /* Der wichtigste Anspruch für die einfache Ansicht: der, der das
@@ -2385,8 +2596,16 @@
 
     var belegListe = belege.length
       ? '<ul class="liste">' + belege.map(function (d) {
+          var hatDatei = !!(d.dateiname || d.mime);
           return '<li><span><span class="marke ' + esc(d.typ) + '">' +
-            esc(TYPTEXT[d.typ] || d.typ) + '</span><span class="titel">' + esc(d.titel) + '</span></span>' +
+            esc(TYPTEXT[d.typ] || d.typ) + '</span><span class="titel">' + esc(d.titel) + '</span>' +
+            '<span class="zeilenknoepfe">' +
+              (hatDatei
+                ? '<button type="button" class="knopf zart" data-beleg-oeffnen="' +
+                  esc(d.id) + '">öffnen</button> '
+                : '') +
+              loeschKnoepfe('beleg', d.id) +
+            '</span></span>' +
             '<span class="wert">' + deDatum(d.erstellt) + '</span></li>';
         }).join('') + '</ul>'
       : '<p class="leerhinweis">Noch keine Rechnung hinterlegt.</p>';
@@ -2396,29 +2615,51 @@
       : '') + belegFormularHtml();
 
     return '<div class="schild">' +
-        '<h1>' + esc(geraet.name) + '</h1>' +
-        '<p class="ort">' + esc(geraet.standort) + '</p>' +
+        '<h1>' + direkt('name', geraet.name) + '</h1>' +
+        '<p class="ort">' + direkt('standort', geraet.standort) + '</p>' +
         '<dl class="paare">' +
-          zeile('Hersteller', i.hersteller) +
-          zeile('Modell', i.modell) +
-          (nummern.length ? zeile('Nummer', nummern[0].wert) : '') +
-        '</dl></div>' +
+          zeile('Hersteller', i.hersteller, 'hersteller') +
+          zeile('Modell', i.modell, 'modell') +
+          zeile('Nummer', nummern.length ? nummern[0].wert : '', 'nummer') +
+        '</dl>' +
+        (inlineMeldung
+          ? '<p class="meldung ' + esc(inlineMeldung.art) + '">' + esc(inlineMeldung.text) + '</p>'
+          : '<p class="tipphinweis">Auf einen Wert tippen, um ihn zu ändern.</p>') +
+        '</div>' +
 
       '<section><h2>Gekauft</h2>' +
         '<ul class="liste">' +
           '<li><span><span class="titel">' +
-            esc(geraet.kauf.verkaeufer || 'Verkäufer nicht erfasst') + '</span><br>' +
-            '<span class="zusatz">am ' + deDatum(geraet.kauf.datum) + '</span></span>' +
+            direkt('verkaeufer', geraet.kauf.verkaeufer) + '</span><br>' +
+            '<span class="zusatz">am ' +
+            direkt('kaufdatum', F.istGueltigesDatum(geraet.kauf.datum)
+              ? deDatum(geraet.kauf.datum) : '') + '</span></span>' +
             '<span class="wert">' +
-            (geraet.kauf.preisCent
-              ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' €'
-              : '') + '</span></li>' +
+            direkt('preis', geraet.kauf.preisCent
+              ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' €' : '') +
+            '</span></li>' +
         '</ul>' +
       '</section>' +
 
       schutz +
 
       '<section><h2>Rechnungen</h2>' + belegListe + '</section>' +
+
+      '<section><h2>Gerät</h2>' +
+        '<div class="geraetknoepfe">' +
+          '<button type="button" class="knopf zart" data-ge-bearbeiten="' + esc(geraet.id) +
+            '">Alle Angaben bearbeiten</button> ' +
+          (geraete.length > 1 ? loeschKnoepfe('geraet', geraet.id) : '') +
+          ((loeschFrage && loeschFrage.art === 'geraet' && loeschFrage.id === geraet.id &&
+            geraetInhalt(geraet).length)
+            ? '<div class="warnung">Mit dem Gerät verschwinden: ' +
+              esc(geraetInhalt(geraet).join(', ')) + '.</div>'
+            : '') +
+          (geraetMeldung
+            ? '<p class="meldung ' + esc(geraetMeldung.art) + '">' + esc(geraetMeldung.text) + '</p>'
+            : '') +
+        '</div>' +
+      '</section>' +
 
       '<p class="umschalthinweis">Fristen, Wartung und Störungen sind ausgeblendet. ' +
       'Über <b>Alles</b> oben werden sie wieder sichtbar.</p>';
@@ -2437,7 +2678,7 @@
         ? ' <button type="button" class="knopf zart" data-abgleich="' +
           (an ? 'aus' : 'an') + '">Abgleich ' + (an ? 'abschalten' : 'einschalten') + '</button>'
         : '') +
-      ' <button type="button" class="knopf zart" data-zuruecksetzen="1">Demodaten zurücksetzen</button></p>' +
+      ' <button type="button" class="knopf zart" data-zuruecksetzen="1">Alles löschen</button></p>' +
       (abgleichMeldung
         ? '<p class="meldung ' + esc(abgleichMeldung.art) + '">' + esc(abgleichMeldung.text) + '</p>'
         : '') +
@@ -2574,7 +2815,14 @@
     /* In der einfachen Ansicht endet die Seite nach den Rechnungen.
        Kein Ausblenden per CSS, sondern gar nicht erst aufbauen. */
     if (ansicht === 'einfach') {
-      zeichneHtml(geraeteWahl() + ansichtWahl() + einfacheAnsicht() + fussnote());
+      /* Auch in der einfachen Ansicht muss das Geräteformular
+         erscheinen können – sonst führt "Alle Angaben bearbeiten"
+         ins Leere. */
+      zeichneHtml(geraeteWahl() + ansichtWahl() +
+        (bearbeiteGeraet
+          ? geraetFormular(bearbeiteGeraet === 'neu' ? leeresGeraet() : geraet)
+          : einfacheAnsicht()) +
+        fussnote());
       return;
     }
 
@@ -2642,6 +2890,21 @@
       })(bloecke[bi]);
     }
 
+    /* Das Eingabefeld beim direkten Bearbeiten: Enter speichert,
+       Escape verwirft, Verlassen speichert ebenfalls. */
+    if (inlineFeld) {
+      var dfeld = document.getElementById('direkt_' + inlineFeld);
+      if (dfeld) {
+        dfeld.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); direktSpeichern(); }
+          else if (e.key === 'Escape') { e.preventDefault(); direktAbbrechen(); }
+        });
+        dfeld.addEventListener('blur', function () {
+          if (inlineFeld) direktSpeichern();
+        });
+      }
+    }
+
     /* Vorschau der berechneten Frist. Schreibt nur in ein einzelnes
        Element – ein Neuzeichnen würde den Fokus aus dem Feld reißen. */
     function vorschauAnspruch() {
@@ -2692,6 +2955,14 @@
         ziel.innerHTML = nummernFelder(this.value, bisher);
       });
     }
+    var kaufartFeld = document.getElementById('ge_kaufart');
+    if (kaufartFeld) {
+      kaufartFeld.addEventListener('change', function () {
+        var ziel = document.getElementById('ge_kaufhinweis');
+        if (ziel) ziel.textContent = kaufHinweisText(this.value, bearbeiteGeraet === 'neu');
+      });
+    }
+
     var katFeld = document.getElementById('ge_kategorie');
     if (katFeld) {
       katFeld.addEventListener('change', function () {
@@ -2862,6 +3133,17 @@
       alleSchliessen(null); abgleichFrage = null;
       abgleichMeldung = { art: 'hinweis', text: 'Abgleich bleibt abgeschaltet.' };
       zeichnen(); return;
+    }
+
+    var dir = e.target.closest('[data-direkt]');
+    if (dir) {
+      alleSchliessen(null);
+      inlineFeld = dir.getAttribute('data-direkt');
+      inlineMeldung = null;
+      zeichnen();
+      var feld = document.getElementById('direkt_' + inlineFeld);
+      if (feld) { feld.focus(); if (feld.select) feld.select(); }
+      return;
     }
 
     var umschalt = e.target.closest('[data-ansicht]');
