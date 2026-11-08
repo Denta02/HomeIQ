@@ -127,6 +127,25 @@
     display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
   }
 
+  .kartenfuss {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-top: 8px; padding-left: 2px;
+  }
+  .kartenfuss .frage { font-size: 13px; color: var(--rot); }
+  .wegklein {
+    font: inherit; font-size: 13.5px;
+    background: none; border: 0; padding: 4px 2px;
+    color: var(--rot); cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .wegklein:hover { color: #8C1D16; }
+  .wegklein.ja {
+    text-decoration: none; font-weight: 500;
+    background: var(--rot); color: #fff;
+    border-radius: 999px; padding: 5px 13px;
+  }
+  .wegklein.ja:hover { background: #8C1D16; }
+
   .punkt {
     display: inline-flex; align-items: center; gap: 6px;
     font-family: var(--zahl); font-weight: 600; font-size: 13.5px;
@@ -256,6 +275,7 @@
   var stichtagStand = null;
   var alleOffen = false;
   var meldung = null;
+  var loeschFrage = null;   // id des Geräts, bei dem nachgefragt wird
 
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -315,6 +335,17 @@
 
   /* ---------- Geräte ---------- */
 
+  /** Was mit dem Gerät verschwinden würde. */
+  function geraetInhalt(g) {
+    var teile = [];
+    if ((g.ansprueche || []).length) teile.push(g.ansprueche.length + ' Ansprüche');
+    if ((g.aufgaben || []).length) teile.push(g.aufgaben.length + ' Aufgaben');
+    if ((g.stoerungen || []).length) teile.push(g.stoerungen.length + ' Störungen');
+    if ((g.lieferungen || []).length) teile.push(g.lieferungen.length + ' Lieferungen');
+    if ((g.dokumente || []).length) teile.push(g.dokumente.length + ' Dokumente');
+    return teile;
+  }
+
   function geraeteListe(liste) {
     return '<ul class="geraete">' + objekt.geraete.map(function (g) {
       var eigene = OB.fuerGeraet(liste, g.id);
@@ -337,12 +368,27 @@
         }
       }
 
+      /* Gelöscht wird hier, nicht in der Akte: in der Liste sieht man,
+         was man löscht, und landet danach nicht auf einer leeren Seite.
+         Zwei Klicks, kein Browser-Dialog. */
+      var gefragt = loeschFrage === g.id;
+      var inhalt = geraetInhalt(g);
+
       return '<li><a href="geraeteakte.html?g=' + encodeURIComponent(g.id) +
         '" class="' + klasse + '">' +
         '<div class="name">' + esc(g.name) + '</div>' +
         (g.standort ? '<div class="raum">' + esc(g.standort) + '</div>' : '') +
         '<div class="lage">' + marken + '</div>' +
-        '</a></li>';
+        '</a>' +
+        '<div class="kartenfuss">' +
+          (gefragt
+            ? '<span class="frage">' +
+              (inhalt.length ? 'Mit dem Gerät verschwinden: ' + esc(inhalt.join(', ')) + '. ' : '') +
+              'Wirklich löschen?</span> ' +
+              '<button type="button" class="wegklein ja" data-loeschen-ja="' + esc(g.id) + '">Ja, löschen</button> ' +
+              '<button type="button" class="wegklein" data-loeschen-nein="1">Abbrechen</button>'
+            : '<button type="button" class="wegklein" data-loeschen="' + esc(g.id) + '">löschen</button>') +
+        '</div></li>';
     }).join('') + '</ul>';
   }
 
@@ -445,6 +491,26 @@
   function verdrahten() {
     var st = document.getElementById('stichtag');
     if (st) st.addEventListener('change', zeichnen);
+
+    document.querySelectorAll('[data-loeschen]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        loeschFrage = b.getAttribute('data-loeschen');
+        zeichnen();
+      });
+    });
+    document.querySelectorAll('[data-loeschen-ja]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-loeschen-ja');
+        objekt.geraete = objekt.geraete.filter(function (g) { return g.id !== id; });
+        loeschFrage = null;
+        meldung = 'Gerät gelöscht.';
+        window.App.speichern();
+        zeichnen();
+      });
+    });
+    document.querySelectorAll('[data-loeschen-nein]').forEach(function (b) {
+      b.addEventListener('click', function () { loeschFrage = null; zeichnen(); });
+    });
 
     var mehr = document.getElementById('mehr');
     if (mehr) mehr.addEventListener('toggle', function () { alleOffen = mehr.open; });
