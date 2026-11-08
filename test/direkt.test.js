@@ -104,5 +104,37 @@ function schreiber(geraet){
   p('drei Nachkommastellen abgelehnt', typeof s.preis('1,234'), 'string');
 }
 
+
+/* --- Adressen fürs Handbuch --- */
+{
+  /* Dieselbe Logik wie in der Oberfläche */
+  function adresseOrdnen(eingabe) {
+    const t=String(eingabe==null?'':eingabe).trim();
+    if(!t) return {url:''};
+    if(/^(javascript|data|vbscript|file):/i.test(t)) return {fehler:'nicht erlaubt'};
+    if(/^https?:\/\//i.test(t)) return {url:t};
+    if(/^\/\//.test(t)) return {url:'https:'+t};
+    const erster=t.split(/[\/?#]/)[0];
+    if(/\s/.test(erster)||erster.indexOf('.')===-1) return {fehler:'keine Adresse'};
+    return {url:'https://'+t};
+  }
+
+  p('ohne Schema wird ergaenzt', adresseOrdnen('www.google.de').url, 'https://www.google.de');
+  p('mit Pfad', adresseOrdnen('dell.com/support/manuals').url, 'https://dell.com/support/manuals');
+  p('https bleibt', adresseOrdnen('https://x.de').url, 'https://x.de');
+  p('http bleibt', adresseOrdnen('http://x.de').url, 'http://x.de');
+  p('Grossschreibung egal', adresseOrdnen('HTTPS://X.DE').url, 'HTTPS://X.DE');
+  p('schemalos mit zwei Strichen', adresseOrdnen('//x.de').url, 'https://x.de');
+  p('Leerzeichen aussen weg', adresseOrdnen('  www.x.de  ').url, 'https://www.x.de');
+  p('leer bleibt leer', adresseOrdnen('').url, '');
+
+  p('javascript abgewiesen', typeof adresseOrdnen('javascript:alert(1)').fehler, 'string');
+  p('data abgewiesen', typeof adresseOrdnen('DATA:text/html,x').fehler, 'string');
+  p('file abgewiesen', typeof adresseOrdnen('file:///etc/passwd').fehler, 'string');
+  p('Text ohne Punkt abgewiesen', typeof adresseOrdnen('Handbuch liegt im Regal').fehler, 'string');
+  p('Satz mit Punkt, aber Leerzeichen', typeof adresseOrdnen('siehe www.x.de bitte').fehler, 'string');
+  p('Pfadanteil darf Leerzeichen haben', adresseOrdnen('x.de/mein handbuch').url, 'https://x.de/mein handbuch');
+}
+
 console.log('\n'+ok+' bestanden, '+fehler+' fehlgeschlagen');
 process.exit(fehler?1:0);
