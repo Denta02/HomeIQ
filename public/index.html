@@ -127,11 +127,6 @@
     display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center;
   }
 
-  .kartenfuss {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-    margin-top: 8px; padding-left: 2px;
-  }
-  .kartenfuss .frage { font-size: 13px; color: var(--rot); }
   .wegklein {
     font: inherit; font-size: 13.5px;
     background: none; border: 0; padding: 4px 2px;
@@ -284,7 +279,6 @@
   var stichtagStand = null;
   var alleOffen = false;
   var meldung = null;
-  var loeschFrage = null;   // id des Geräts, bei dem nachgefragt wird
   var alleFrage = false;    // Rückfrage vor dem Löschen aller Geräte
 
   function esc(s) {
@@ -378,27 +372,12 @@
         }
       }
 
-      /* Gelöscht wird hier, nicht in der Akte: in der Liste sieht man,
-         was man löscht, und landet danach nicht auf einer leeren Seite.
-         Zwei Klicks, kein Browser-Dialog. */
-      var gefragt = loeschFrage === g.id;
-      var inhalt = geraetInhalt(g);
-
       return '<li><a href="geraeteakte.html?g=' + encodeURIComponent(g.id) +
         '" class="' + klasse + '">' +
         '<div class="name">' + esc(g.name) + '</div>' +
         (g.standort ? '<div class="raum">' + esc(g.standort) + '</div>' : '') +
         '<div class="lage">' + marken + '</div>' +
-        '</a>' +
-        '<div class="kartenfuss">' +
-          (gefragt
-            ? '<span class="frage">' +
-              (inhalt.length ? 'Mit dem Gerät verschwinden: ' + esc(inhalt.join(', ')) + '. ' : '') +
-              'Wirklich löschen?</span> ' +
-              '<button type="button" class="wegklein ja" data-loeschen-ja="' + esc(g.id) + '">Ja, löschen</button> ' +
-              '<button type="button" class="wegklein" data-loeschen-nein="1">Abbrechen</button>'
-            : '<button type="button" class="wegklein" data-loeschen="' + esc(g.id) + '">löschen</button>') +
-        '</div></li>';
+        '</a></li>';
     }).join('') + '</ul>' + alleLoeschen();
   }
 
@@ -519,25 +498,6 @@
     var st = document.getElementById('stichtag');
     if (st) st.addEventListener('change', zeichnen);
 
-    document.querySelectorAll('[data-loeschen]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        loeschFrage = b.getAttribute('data-loeschen');
-        zeichnen();
-      });
-    });
-    document.querySelectorAll('[data-loeschen-ja]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        var id = b.getAttribute('data-loeschen-ja');
-        objekt.geraete = objekt.geraete.filter(function (g) { return g.id !== id; });
-        loeschFrage = null;
-        meldung = 'Gerät gelöscht.';
-        window.App.speichern();
-        zeichnen();
-      });
-    });
-    document.querySelectorAll('[data-loeschen-nein]').forEach(function (b) {
-      b.addEventListener('click', function () { loeschFrage = null; zeichnen(); });
-    });
 
     var mehr = document.getElementById('mehr');
     if (mehr) mehr.addEventListener('toggle', function () { alleOffen = mehr.open; });
@@ -553,7 +513,6 @@
          Gebäudeangaben bleiben erhalten. */
       objekt.geraete = [];
       alleFrage = false;
-      loeschFrage = null;
       meldung = zahl + ' Geräte gelöscht.';
       window.App.speichern();
       zeichnen();

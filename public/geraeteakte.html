@@ -394,6 +394,20 @@
     font-size: 22px; line-height: 1; font-weight: 400;
     vertical-align: middle;
   }
+  .handbuchoeffnen, .handbuchplus {
+    font: inherit; font-size: 14px;
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: var(--akzent-hell);
+    border-bottom: 1px solid rgba(201,221,224,.45);
+  }
+  .handbuchoeffnen { font-weight: 600; }
+  .handbuchoeffnen:hover, .handbuchplus:hover { border-bottom-color: var(--akzent-hell); }
+  .paar dd a {
+    color: var(--akzent-hell);
+    border-bottom: 1px solid rgba(201,221,224,.45);
+    text-decoration: none;
+  }
+
   .handbuchlink { margin: 8px 0 10px; font-size: 13.5px; }
   .handbuchlink a {
     color: var(--akzent); text-decoration: none;
@@ -1292,7 +1306,7 @@
               paar('Verkäufer', 'verkaeufer', geraet.kauf.verkaeufer, true) +
               paar('Preis', 'preis', geraet.kauf.preisCent
                    ? (geraet.kauf.preisCent / 100).toFixed(2).replace('.', ',') + ' €' : '') +
-              paar('Handbuch', 'handbuch', (geraet.handbuch && geraet.handbuch.url) || '', true) +
+              '<div class="paar weit"><dt>Handbuch</dt><dd>' + handbuchZelle() + '</dd></div>' +
               paar('Notiz', 'notiz', geraet.notiz, true);
 
     var hinweise = HS.pruefeNummern(i.hersteller, nummern)
@@ -2493,6 +2507,33 @@
    * Modus, weil die einfache Ansicht sonst wieder kompliziert wird.
    */
 
+  /**
+   * Bringt eine eingetippte Adresse in Ordnung.
+   *
+   * "www.google.de" ohne Schema ist für den Browser eine Datei im
+   * selben Ordner – daher wird https:// ergänzt. Schemata, mit denen
+   * sich Schadcode ausführen ließe, werden abgewiesen: der Verweis
+   * landet später in einem anklickbaren Link.
+   */
+  function adresseOrdnen(eingabe) {
+    var t = String(eingabe == null ? '' : eingabe).trim();
+    if (!t) return { url: '' };
+
+    if (/^(javascript|data|vbscript|file):/i.test(t)) {
+      return { fehler: 'Diese Art von Adresse ist hier nicht erlaubt.' };
+    }
+    if (/^https?:\/\//i.test(t)) return { url: t };
+    if (/^\/\//.test(t)) return { url: 'https:' + t };
+
+    /* Sieht es überhaupt nach einer Adresse aus? Ein Punkt im ersten
+       Abschnitt und kein Leerzeichen reichen als Unterscheidung. */
+    var erster = t.split(/[\/?#]/)[0];
+    if (/\s/.test(erster) || erster.indexOf('.') === -1) {
+      return { fehler: 'Das sieht nicht nach einer Internetadresse aus, zum Beispiel www.hersteller.de/handbuch.' };
+    }
+    return { url: 'https://' + t };
+  }
+
   var INLINE = {
     name: {
       label: 'Name', typ: 'text',
@@ -2595,8 +2636,10 @@
       label: 'Handbuch', typ: 'text',
       lesen: function () { return (geraet.handbuch && geraet.handbuch.url) || ''; },
       schreiben: function (w) {
+        var fertig = adresseOrdnen(w);
+        if (fertig.fehler) return fertig.fehler;
         if (!geraet.handbuch) geraet.handbuch = { url: '', quelle: '', dokumentId: null };
-        geraet.handbuch.url = String(w).trim();
+        geraet.handbuch.url = fertig.url;
       }
     },
     preis: {
@@ -2709,37 +2752,38 @@
    * kann nebeneinander bestehen – die Datei hat Vorrang, weil sie
    * ohne Netz funktioniert.
    */
-  function handbuchAbschnitt() {
-    var doku = (geraet.dokumente || []).filter(function (d) { return d.typ === 'handbuch'; })[0];
+  /**
+   * Eine Zeile fürs Handbuch, in beiden Ansichten gleich.
+   * Liegt eine Datei vor, führt der erste Klick direkt hinein –
+   * das ist der Fall, der im Heizungskeller ohne Netz zählt.
+   */
+  function handbuchZelle() {
+    var doku = (geraet.dokumente || []).filter(function (d) {
+      return d.typ === 'handbuch' && (d.dateiname || d.mime);
+    })[0];
     var url = (geraet.handbuch && geraet.handbuch.url) || '';
-    var teile = '';
 
+    var teile = [];
     if (doku) {
-      var hatDatei = !!(doku.dateiname || doku.mime);
-      teile += '<ul class="liste"><li><span>' +
-        '<span class="marke handbuch">Handbuch</span>' +
-        '<span class="titel">' + esc(doku.titel) + '</span><br>' +
-        '<span class="zusatz">' + esc(doku.dateiname || 'keine Datei hinterlegt') + '</span>' +
-        '<span class="zeilenknoepfe">' +
-          (hatDatei
-            ? '<button type="button" class="knopf" data-beleg-oeffnen="' + esc(doku.id) + '">öffnen</button> '
-            : '') +
-          loeschKnoepfe('beleg', doku.id) +
-        '</span></span>' +
-        '<span class="wert">' + deDatum(doku.erstellt) + '</span></li></ul>';
+      teile.push('<button type="button" class="handbuchoeffnen" data-beleg-oeffnen="' +
+        esc(doku.id) + '">' + esc(doku.dateiname || 'Datei') + ' öffnen</button>');
+    }
+    if (url) {
+      teile.push('<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' +
+        'beim Hersteller</a>');
+    }
+    teile.push(direkt('handbuch', (doku || url) ? 'Verweis ändern' : ''));
+
+    if (!doku && belegFormular !== 'handbuch') {
+      teile.push('<button type="button" class="handbuchplus" data-beleg-neu="handbuch">' +
+        'Datei hinzufügen</button>');
     }
 
-    /* Der Verweis steht immer zur Verfügung, auch neben einer Datei –
-       Hersteller aktualisieren Anleitungen. */
-    teile += '<p class="handbuchlink">' +
-      (url
-        ? '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">Anleitung beim Hersteller öffnen</a> · '
-        : '') +
-      direkt('handbuch', url ? 'Verweis ändern' : '') + '</p>';
-
-    if (!doku) teile += belegFormularHtml('handbuch');
-
-    return '<section><h2>Handbuch</h2>' + teile + '</section>';
+    /* Das Formular muss dort erscheinen, wo es angefordert wurde.
+       Vorher wurde nur der Zustand gesetzt und nirgends gezeichnet –
+       der Knopf tat scheinbar nichts. */
+    return teile.join(' · ') +
+      (belegFormular === 'handbuch' ? belegFormularHtml('handbuch') : '');
   }
 
   function einfacheAnsicht() {
@@ -2785,29 +2829,10 @@
           '</div></section>'
       : '';
 
-    var belege = (geraet.dokumente || []).filter(function (d) {
-      return d.typ === 'kaufbeleg' || d.typ === 'reparaturrechnung';
-    });
-
-    var belegListe = belege.length
-      ? '<ul class="liste">' + belege.map(function (d) {
-          var hatDatei = !!(d.dateiname || d.mime);
-          return '<li><span><span class="marke ' + esc(d.typ) + '">' +
-            esc(TYPTEXT[d.typ] || d.typ) + '</span><span class="titel">' + esc(d.titel) + '</span>' +
-            '<span class="zeilenknoepfe">' +
-              (hatDatei
-                ? '<button type="button" class="knopf zart" data-beleg-oeffnen="' +
-                  esc(d.id) + '">öffnen</button> '
-                : '') +
-              loeschKnoepfe('beleg', d.id) +
-            '</span></span>' +
-            '<span class="wert">' + deDatum(d.erstellt) + '</span></li>';
-        }).join('') + '</ul>'
-      : '<p class="leerhinweis">Noch keine Rechnung hinterlegt.</p>';
-
-    belegListe += (belegMeldung
-      ? '<p class="meldung ' + esc(belegMeldung.art) + '">' + esc(belegMeldung.text) + '</p>'
-      : '') + belegFormularHtml('rechnung');
+    /* Dieselbe Liste wie in der vollen Ansicht: alle Dokumente,
+       mit Öffnen und Löschen. Zwei verschiedene Listen für dieselben
+       Daten wären eine Quelle für Abweichungen. */
+    var belegListe = dokumente('');
 
     return '<div class="schild">' +
         schildKopf() +
@@ -2815,7 +2840,8 @@
         '<dl class="paare">' +
           zeile('Hersteller', i.hersteller, 'hersteller') +
           zeile('Modell', i.modell, 'modell') +
-          zeile('Nummer', nummern.length ? nummern[0].wert : '', 'nummer') +
+          zeile('Serien- oder Typennummer', nummern.length ? nummern[0].wert : '', 'nummer') +
+          '<div class="paar weit"><dt>Handbuch</dt><dd>' + handbuchZelle() + '</dd></div>' +
         '</dl>' +
         (inlineMeldung
           ? '<p class="meldung ' + esc(inlineMeldung.art) + '">' + esc(inlineMeldung.text) + '</p>'
@@ -2838,9 +2864,7 @@
 
       schutz +
 
-      handbuchAbschnitt() +
-
-      '<section><h2>Rechnungen</h2>' + belegListe + '</section>' +
+      '<section><h2>Dokumente</h2>' + belegListe + '</section>' +
 
       '<p class="umschalthinweis">Fristen, Wartung und Störungen sind ausgeblendet. ' +
       'Über <b>Alles</b> oben werden sie wieder sichtbar.</p>';
@@ -2859,7 +2883,7 @@
         ? ' <button type="button" class="knopf zart" data-abgleich="' +
           (an ? 'aus' : 'an') + '">Abgleich ' + (an ? 'abschalten' : 'einschalten') + '</button>'
         : '') +
-      ' <button type="button" class="knopf zart" data-zuruecksetzen="1">Alles löschen</button></p>' +
+      '</p>' +
       (abgleichMeldung
         ? '<p class="meldung ' + esc(abgleichMeldung.art) + '">' + esc(abgleichMeldung.text) + '</p>'
         : '') +
