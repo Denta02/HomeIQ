@@ -73,8 +73,7 @@ const p=(n,i,s)=>{if(JSON.stringify(i)===JSON.stringify(s))ok++;
   p('nicht sofort scharf', /id="alleJa"/.test(voll), false);
   p('alter Knopf verschwunden', /id="leeren"/.test(voll), false);
 
-  p('Löschen je Gerät angeboten', /data-loeschen="/.test(voll), true);
-  p('Löschen nicht sofort scharf', /data-loeschen-ja/.test(voll), false);
+  p('kein Löschen je Karte', /data-loeschen="/.test(voll), false);
 
   /* Geräteakte ohne Gerät */
   const lager2={};

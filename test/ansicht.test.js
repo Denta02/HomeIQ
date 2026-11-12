@@ -74,7 +74,10 @@ const p=(n,i,s)=>{ if(JSON.stringify(i)===JSON.stringify(s)) ok++;
   p('einfach: Stoerungen weg', /Störungen und Reparaturen/.test(einfach), false);
   p('einfach: Brennstoff weg', /Brennstoff<\/span>/.test(einfach), false);
   p('einfach: Gekauft da', /Gekauft/.test(einfach), true);
-  p('einfach: Rechnungen da', /Rechnungen/.test(einfach), true);
+  /* Der Abschnitt heißt jetzt "Dokumente" und zeigt alle Arten,
+     nicht mehr nur Kauf- und Reparaturbelege. */
+  p('einfach: Dokumente da', /Dokumente<\/h2>/.test(einfach), true);
+  p('einfach: alle Arten sichtbar', /class="marke typenschild"/.test(einfach), true);
   p('einfach: Geraetename da', /Laptop Dell XPS 15/.test(einfach), true);
   p('einfach: Verkaeufer da', /Media Markt/.test(einfach), true);
   p('einfach: Umschalter bleibt', /data-ansicht="alles"/.test(einfach), true);
