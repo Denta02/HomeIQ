@@ -87,10 +87,15 @@ Gerät kommt über das Plus auf der Übersicht. Einen Beispielbestand
 bringt die App nicht mit – `test/beispiel.js` ist eine reine
 Testvorlage und wird nicht ausgeliefert.
 Ab da bleiben Änderungen erhalten: eine Erledigung eintragen, neu laden,
-sie ist noch da. Der Knopf "Alles löschen" in der Kopfzeile
-leert den Bestand wieder.
+sie ist noch da. Unter der Geräteliste steht "Alle Geräte löschen" – mit Rückfrage,
+die die Anzahl nennt. Das Zuhause selbst bleibt dabei erhalten.
 
-Belege kommen über das **+** bei den Rechnungen hinzu: Datei oder Foto
+Das Handbuch steht in beiden Ansichten als Zeile im Typenschild: eine
+hochgeladene PDF lässt sich von dort direkt öffnen, daneben der
+Verweis auf die Herstellerseite.
+
+Beide Ansichten zeigen dieselbe Dokumentenliste mit Öffnen und
+Löschen. Belege kommen über das **+** hinzu: Datei oder Foto
 wählen, Titel, Art, Datum. Die Datei landet in IndexedDB, die
 Beschreibung im Objekt. Die Datei wird noch nicht nach Drive
 übertragen – das kommt mit dem Drive-Adapter.
@@ -107,9 +112,12 @@ die Selbsthilfe für dieses Gerät gesperrt wäre.
 Gelöscht wird nie auf einen Klick: der erste stellt die Frage, der
 zweite führt sie aus.
 
-In der einfachen Ansicht lässt sich jeder Wert direkt anklicken und
+In beiden Ansichten lässt sich jeder Wert direkt anklicken und
 ändern: Name, Standort, Hersteller, Modell, Nummer, Verkäufer, Datum
-und Preis. Enter oder Verlassen speichert, Escape verwirft. Belege lassen sich
+und Preis, in der vollen Ansicht zusätzlich Kategorie, Status,
+Kaufart, Handbuch, Notiz und jede Nummer vom Typenschild. Enter oder
+Verlassen speichert, Escape verwirft. Gelöscht werden Geräte in der
+Übersicht, nicht in der Akte. Belege lassen sich
 dort öffnen und entfernen, das Gerät selbst löschen.
 
 Oben lässt sich zwischen **Einfach** und **Alles** umschalten. Die
@@ -125,7 +133,7 @@ steht dort "Drive nicht verbunden" – das ist im Browser der Normalfall.
 
 ## Stand
 
-737 Tests. Für den Abgleich im Browser muss in beiden HTML-Dateien
+796 Tests. Für den Abgleich im Browser muss in beiden HTML-Dateien
 `window.HOMEIQ_CLIENT_ID` auf die Client-ID aus der Cloud Console
 gesetzt werden. Leer bedeutet: nur lokal.
 
